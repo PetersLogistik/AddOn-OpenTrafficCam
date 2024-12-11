@@ -1,4 +1,4 @@
-# AddOn-OpenTraficCam
+# AddOn-OpenTrafficCam
 Ein kleiner Zusatz, um die Umbenennungen der Videos und Aktivierung des OTVision-Programms zu automatisieren.
 
 ## Installation ##
