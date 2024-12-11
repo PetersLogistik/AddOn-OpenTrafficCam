@@ -74,7 +74,7 @@ def rename_files_with_extensions(directory, datum_uhrzeit):
             except Exception as e:
                 print(f"Ein Fehler ist aufgetreten: {e}")
             anz+=1
-    print(f"Im schnitt ist ein Viedeo {v_len/anz} sek lang.")
+    print(f"Im schnitt ist ein Video {v_len/anz} sek lang.")
 
 def main():
     target_directory = abfrage_path()
