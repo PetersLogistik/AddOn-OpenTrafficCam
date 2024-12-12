@@ -39,13 +39,17 @@ def abfrage_zeit():
     print(f"Uhrzeit: {datum_uhrzeit.strftime('%H:%M:%S')}")
     return datum_uhrzeit
 
-def get_video_len(video_path):
-    # gibt die Länge des Videos in Sekunden zurück
-    #video = moviepy.VideoFileClip(video_path) 
-    video = VideoFileClip(video_path) 
-    video_len = video.duration
-    video.close()
-    return video_len
+def get_video_len_ffprobe(video_path):
+    command = [
+        "ffprobe",
+        "-v", "error",
+        "-show_entries", "format=duration",
+        "-of", "json",
+        video_path
+    ]
+    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    info = json.loads(result.stdout)
+    return float(info['format']['duration'])
 
 def rename_files_with_extensions(directory, datum_uhrzeit):
     extensions = [".mp4", ".MP4"]
@@ -65,7 +69,7 @@ def rename_files_with_extensions(directory, datum_uhrzeit):
             file = file + f"_{neue_zeit.strftime('%Y-%m-%d_%H-%M-%S')}.mp4"
             new_file = os.path.join(directory, file)
             # Videozeit addieren
-            v_len += get_video_len(file_path)
+            v_len += get_video_len_ffprobe(file_path)
             # Ausführen
             try:
                 os.rename(file_path, new_file)
