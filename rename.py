@@ -5,13 +5,11 @@
 """
 from tqdm import tqdm
 import os
-from moviepy import VideoFileClip
-#import moviepy
+import subprocess
+import json
 from datetime import datetime, timedelta
+import requests
 
-# path = r"D:\OpenTrafic\2024-10_Bochum_Langendreer\Überweg"
-# video = r"GP016488_2023-04-26_06-56-30.MP4"
-# times='2023-04-26_06-56-30'
 def abfrage_path():
     path = input("Gib den Zielordner ein: ").strip()
     if path == "":
@@ -23,7 +21,7 @@ def abfrage_path():
 
 def abfrage_zeit():
     # Eingabe des Datums und der Uhrzeit
-    input_string = input("Gib das Datum und die Uhrzeit des ersten Videos im Format 'YYYY-MM-DD HH-MM-SS' ein. Bei keiner Eingabe wird 1970 angenommen: ")
+    input_string = input("Gib das Datum und die Uhrzeit des ersten Videos im Format 'YYYY-MM-DD HH-MM-SS' ein. Bei keiner Eingabe wird 1970-01-01 00:00:00 angenommen: ")
     if input_string != "":
         try:
             # Umwandlung des Eingabestrings in ein datetime-Objekt
@@ -51,10 +49,12 @@ def get_video_len_ffprobe(video_path):
     info = json.loads(result.stdout)
     return float(info['format']['duration'])
 
-def rename_files_with_extensions(directory, datum_uhrzeit):
+
+def rename_files_with_extensions(directory, datum_uhrzeit, rescale = 'n'):
     extensions = [".mp4", ".MP4"]
     v_len=0
     anz=0
+    worklist = []
     files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
     files.sort()
 
@@ -62,30 +62,80 @@ def rename_files_with_extensions(directory, datum_uhrzeit):
         _, ext = os.path.splitext(file)
         if ext.lower() in extensions:
             file_path = os.path.join(directory, file)
+            
             # Namen generieren
             file = file.strip(ext)
             file = file.split('_')[0]
             neue_zeit = datum_uhrzeit + timedelta(seconds=v_len)
             file = file + f"_{neue_zeit.strftime('%Y-%m-%d_%H-%M-%S')}.mp4"
-            new_file = os.path.join(directory, file)
+            
             # Videozeit addieren
             v_len += get_video_len_ffprobe(file_path)
+            
             # Ausführen
-            try:
-                os.rename(file_path, new_file)
-            except FileNotFoundError:
-                print(f"Die Datei '{file_path}' wurde nicht gefunden.")
-            except Exception as e:
-                print(f"Ein Fehler ist aufgetreten: {e}")
+            if rescale == 'y': # mit rescale
+                # Ordner ertstellen
+                working_path = os.path.join(directory, r"scale_videos")
+                try:
+                     os.mkdir(working_path)
+                except FileExistsError:
+                    pass
+                except Exception as e:
+                    print(f"Ein Fehler (Ordner) ist aufgetreten: {e}")
+                # Pfadänderung zum Ordner
+                new_file = os.path.join(directory, r'scale_videos', file)
+                # Zusatz Comand öffnen und ffmpeg ausführen
+                command = f"ffmpeg -i {file_path} -s 800x600 -c:a copy {new_file}"
+                comander = f'start /wait cmd /c "{command}"' 
+                try:
+                    process = subprocess.Popen(comander, shell=True) 
+                    process.wait()
+                except Exception as e:
+                    print(f"Ein Fehler (Scale) ist aufgetreten: {e}, \n {comander}")
+            else: # ohne scale
+                # Einfache Umbenennung im gegebenen Ordner
+                working_path = directory
+                new_file = os.path.join(directory, file)
+                try:
+                    os.rename(file_path, new_file)
+                except FileNotFoundError:
+                    print(f"Die Datei '{file_path}' wurde nicht gefunden.")
+                except Exception as e:
+                    print(f"Ein Fehler (File) ist aufgetreten: {e}")
             anz+=1
-    print(f"Im schnitt ist ein Video {v_len/anz} sek lang.")
+    # Berechnung der Videozeit im Durchschnitt
+    duration = round(v_len / anz, 0).as_integer_ratio()[0]
+    print(f"Im schnitt ist ein Video {duration} sek lang.")
+    return working_path, duration
+
+def tsenden(nachricht = 'Sollte was senden, weiß nicht was...'):
+    # die chat_id ist die aus der obigen Response
+    token="7758414756:AAE-1IXr8StbPOLpVL0IgrDJOFvbsi7ukac"
+    params = {"chat_id":"7464651487", "text":nachricht}
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    requests.post(url, params=params)
 
 def main():
     target_directory = abfrage_path()
     zeit = abfrage_zeit()
+    rescale = input('Sollen die Videos auf 800x600px reduziert werden? (y/n): ').lower().strip()
     isSure = input('Sind die Eingaben korrekt? (y/n): ').lower().strip()
+    isDetect = input('Soll Detect anschließend gestartet werden? (y/n): ').lower().strip()
+    isTrack = input('Soll Track nach dem durchlauf gestartet werden? (y/n): ').lower().strip()
     if isSure == 'y':
-        rename_files_with_extensions(target_directory, zeit)
-
+        working, duration = rename_files_with_extensions(target_directory, zeit, rescale)
+    if isDetect == 'y':
+        command = f'python detect.py -p "{working}" --expected_duration "{duration}"'
+        try:
+           subprocess.run(command, shell=True)
+        except Exception as e:
+           tsenden(f"Ein Fehler (File) ist aufgetreten: {e}")
+    if isTrack == 'y':
+        command = f'python track.py -p "{working}"'
+        try:
+            subprocess.run(command, shell=True)
+        except Exception as e:
+           tsenden(f"Ein Fehler (File) ist aufgetreten: {e}")
+        
 if __name__ == __name__:
     main()
