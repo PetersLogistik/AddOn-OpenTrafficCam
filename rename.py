@@ -8,7 +8,6 @@ import os
 import subprocess
 import json
 from datetime import datetime, timedelta
-import requests
 
 def abfrage_path():
     path = input("Gib den Zielordner ein: ").strip()
@@ -107,13 +106,6 @@ def rename_files_with_extensions(directory, datum_uhrzeit, rescale = 'n'):
     duration = round(v_len / anz, 0).as_integer_ratio()[0]
     print(f"Im schnitt ist ein Video {duration} sek lang.")
     return working_path, duration
-
-def tsenden(nachricht = 'Sollte was senden, weiß nicht was...'):
-    # die chat_id ist die aus der obigen Response
-    token="7758414756:AAE-1IXr8StbPOLpVL0IgrDJOFvbsi7ukac"
-    params = {"chat_id":"7464651487", "text":nachricht}
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
-    requests.post(url, params=params)
 
 def main():
     target_directory = abfrage_path()
