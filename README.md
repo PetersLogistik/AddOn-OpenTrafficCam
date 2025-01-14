@@ -1,13 +1,18 @@
 # AddOn-OpenTrafficCam
 Ein kleiner Zusatz, um die Umbenennungen der Videos und Aktivierung des OTVision-Programms zu automatisieren.
 
+## Hinweis ##
+Die Dateien mit rename_v?.py sind ältere Versionen von der Datei ohne rename_v?.py
+
+Um einen Durchlauf der Programme ohne manuelle Eingaben ist anstelle der OTVision.cmd die GoOn.cmd zu nutzen.
+
 ## Installation ##
 - die beiden Dateien oben herunterladen.
 - die .bat-Datei in dem Ordner vor dem OTVision-Programm ablegen, den Ordner mit dem OTVision-Programm in 'OTVision' umbenennen, falls dieser anders heißt.
 - die 'rename.py' in den Ordner 'OTVision' ablegen. <br>
 ---
   Die Dateien sollten wie folgt aufzufinden sein:<br>
-    ...\OTVision.bat<br>
+    ...\OTVision.cmd<br>
     ...\OTVision\rename.py
 
 ## Anwenden ##
