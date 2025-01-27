@@ -13,14 +13,17 @@ from datetime import datetime, timedelta
 # Get the path from the environment variable
 config_path = os.getenv("OT_PATH") # Abfrage nicht notwendig, da CMD bereits abfragt
 
-def abfrage_zeit():
+def abfrage_zeit(isTest = False):
     # Eingabe des Datums und der Uhrzeit
-    input_string = input("Gib das Datum und die Uhrzeit des ersten Videos ein. Auchte auf das Format 'YYYY-MM-DD HH-MM-SS'. Bei keiner Eingabe (Enter) wird 1970-01-01 00:00:00 angenommen: ")
+    if isTest == False:
+        input_string = input("Gib das Datum und die Uhrzeit des ersten Videos ein. Auchte auf das Format 'YYYY-MM-DD HH-MM-SS'. Bei keiner Eingabe (Enter) wird 1970-01-01 00-00-00 angenommen: ")
+    else:
+        input_string = "2025-02-24 10-00-00"
     if input_string != "":
         try:
             # Umwandlung des Eingabestrings in ein datetime-Objekt
             datetime.strptime
-            datum_uhrzeit = datetime.strptime(input_string, '%Y-%m-%d %H:%M:%S')
+            datum_uhrzeit = datetime.strptime(input_string, '%Y-%m-%d %H-%M-%S')
         except ValueError:
             print("Das eingegebene Format ist ungültig. Bitte verwende das Format 'YYYY-MM-DD HH-MM-SS'.")
             abfrage_zeit()
@@ -142,28 +145,36 @@ def abfragen():
     target = []
     isMore = 'y'
     isRename = input('Soll den die Videos umbenannt werden? (y/n): ').lower().strip()
-    isRescale = input('Sollen die Videos auf 800x600px reduziert werden? (y/n): ').lower().strip()
-    isDetect = input('Soll Detect anschließend gestartet werden? (y/n): ').lower().strip()
-    isTrack = input('Soll Track nach dem durchlauf gestartet werden? (y/n): ').lower().strip()
+    if isRename != 't':
+        isRescale = input('Sollen die Videos auf 800x600px reduziert werden? (y/n): ').lower().strip()
+        isDetect = input('Soll Detect anschließend gestartet werden? (y/n): ').lower().strip()
+        isTrack = input('Soll Track nach dem durchlauf gestartet werden? (y/n): ').lower().strip()
 
-    while isMore != 'n':
-        target.append(abfrage_path())
-        isMore = input('Sollen weitere Ordner mit Videos eingegeben werden? (y/n): ').lower().strip()
-    return target, isRename, isRescale, isDetect, isTrack
+        while isMore != 'n':
+            target.append(abfrage_path())
+            isMore = input('Sollen weitere Ordner mit Videos eingegeben werden? (y/n): ').lower().strip()
+        return target, isRename, isRescale, isDetect, isTrack, False
+    else:
+        target.append(config_path + '\\' + 'TestVideo')
+        return target, 'y', 'y', 'y', 'y', True
 
 def main():
     import subprocess
     import torch
+    
     comander = f'msg * " CUDA active: {torch.cuda.is_available()}, {torch.cuda.get_device_name(0) if torch.cuda.is_available() else "Keine GPU"}"'
     subprocess.run(comander, text=True)
     
     # Hauptablaufplan
-    target, isRename, isRescale, isDetect, isTrack = abfragen()
+    target, isRename, isRescale, isDetect, isTrack, isTest = abfragen()
     for target_directory in tqdm(target):
         if isRescale == 'y':
             print(f"Starting Scaling: {datetime.now()}")
-            zeit = abfrage_zeit()
-            isSure = input(f'Sind die Eingaben für den Ordner {target_directory} korrekt? (y/n): ').lower().strip()
+            zeit = abfrage_zeit(isTest)
+            if isTest == True:
+                isSure = 'y'
+            else:
+                isSure = input(f'Sind die Eingaben für den Ordner {target_directory} korrekt? (y/n): ').lower().strip()
             if isSure == 'y': 
                 target_directory, duration = einlesen(target_directory, zeit, isRescale)
         elif isRename == 'y':
