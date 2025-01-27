@@ -2,13 +2,16 @@
     @Author: Patrick Peters
     @Date: 11.12.2024
     @Main: Ziel ist es die Dateien eines Ordners, die bereist numerisch o.Ä. sortierbar sind mit einem Datum und Zeitstempel auszustadtten, damit das Folgeprogamm die Dateien mergen kann.
-    @Version: 2.0
+    @Version: 3.0
 """
 from tqdm import tqdm
 import os
 import subprocess
 import json
 from datetime import datetime, timedelta
+
+# Get the path from the environment variable
+config_path = os.getenv("OT_PATH") # Abfrage nicht notwendig, da CMD bereits abfragt
 
 def abfrage_zeit():
     # Eingabe des Datums und der Uhrzeit
@@ -149,6 +152,11 @@ def abfragen():
     return target, isRename, isRescale, isDetect, isTrack
 
 def main():
+    import subprocess
+    import torch
+    comander = f'msg * " CUDA active: {torch.cuda.is_available()}, {torch.cuda.get_device_name(0) if torch.cuda.is_available() else "Keine GPU"}"'
+    subprocess.run(comander, text=True)
+    
     # Hauptablaufplan
     target, isRename, isRescale, isDetect, isTrack = abfragen()
     for target_directory in tqdm(target):

@@ -1,22 +1,17 @@
 @echo off
-:: holt sich den Pfad zu OT
-set PATH_TO_OT=%OT_PATH%
-if "%OT_PATH%"=="" (
-	:: Zeigt Meldung bei fehlenderm Path Pfad
-    echo msgbox "Die Umgebungsvariable 'OT_PATH' ist nicht gesetzt. Bitte in Path einsetzen. \n Variable=OT_PATH & Wert=Pfad-zum-Oberordner", vbInformation, "Programm start" > %temp%\meldung1.vbs
-	if exist %temp%\meldung1.vbs (
-		%temp%\meldung1.vbs
-		del %temp%\meldung1.vbs
-	)
-    exit /b 1
+:: Zeige Nachricht
+echo msgbox "Bitte Meldungen in der Console bearbeiten", vbInformation, "Programm start" > %temp%\meldung1.vbs
+if exist %temp%\meldung1.vbs (
+	%temp%\meldung1.vbs
+	del %temp%\meldung1.vbs
 )
 :: Setze Umgebung
 setlocal
-if not exist "%PATH_TO_OT%\OTVision" (
-    echo Verzeichnis "%PATH_TO_OT%\OTVision" wurde nicht gefunden.
+if not exist "%~dp0\OTVision" (
+    echo Verzeichnis "%~dp0\OTVision" wurde nicht gefunden.
     exit /b
 )
-cd "%PATH_TO_OT%\OTVision"
+cd %~dp0\OTVision
 echo start OTVision
 :: Aktiviere virtuelles Py-Umfeld
 if not exist "venv\Scripts\activate.bat" (
@@ -25,7 +20,7 @@ if not exist "venv\Scripts\activate.bat" (
 )
 call venv\Scripts\activate
 :: führe Skript aus
-call python "%~dp0rename.py"
+call python rename.py 
 :: Zeige Abschlussnachricht
 echo msgbox "Die Verarbeitung ist Abgeschlossen.", vbInformation, "Programm ende" > %temp%\meldung2.vbs
 if exist %temp%\meldung2.vbs (
