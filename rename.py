@@ -167,11 +167,13 @@ def main():
     
     # Hauptablaufplan
     target, isRename, isRescale, isDetect, isTrack, isTest = abfragen()
+    zeit = False
     for target_directory in tqdm(target):
         if isRescale == 'y':
             print(f"Starting Scaling: {datetime.now()}")
-            zeit = abfrage_zeit(isTest)
-            if isTest == True:
+            if zeit == False:
+                zeit = abfrage_zeit(isTest)
+            if isTest == True or zeit != False:
                 isSure = 'y'
             else:
                 isSure = input(f'Sind die Eingaben für den Ordner {target_directory} korrekt? (y/n): ').lower().strip()
@@ -179,8 +181,12 @@ def main():
                 target_directory, duration = einlesen(target_directory, zeit, isRescale)
         elif isRename == 'y':
             print(f"Starting Rename: {datetime.now()}")
-            zeit = abfrage_zeit()
-            isSure = input(f'Sind die Eingaben für den Ordner {target_directory} korrekt? (y/n): ').lower().strip()
+            if zeit == False:
+                zeit = abfrage_zeit()
+            if zeit != False:
+                isSure = 'y'
+            else:
+                isSure = input(f'Sind die Eingaben für den Ordner {target_directory} korrekt? (y/n): ').lower().strip()
             if isSure == 'y': 
                 target_directory, duration = einlesen(target_directory, zeit)
 
@@ -188,7 +194,8 @@ def main():
             print(f"Starting Detect: {datetime.now()}")
             if isDetect == 'y': 
                 target_directory, duration = einlesen(target_directory, low=True)
-                command = f'python detect.py -p "{target_directory}" --expected_duration "{duration}"'
+                # command = f'python detect.py -p "{target_directory}" --expected_duration "{duration}"' # standart YOLOv8s, Konfidenzschwelle 0.25, IoU-Schwelle 0.45
+                command = f'python detect.py -p "{target_directory}" --expected_duration "{duration}" -w yolov8m.pt -conf 0.1 -iou 0.6 ' # version 2: YOLOv8m, Konfidenzschwelle 0.1, IoU-Schwelle 0.6
                 try:
                     subprocess.run(command, shell=True)
                 except Exception as e:
