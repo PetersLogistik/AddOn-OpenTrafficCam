@@ -1,3 +1,4 @@
+:: Version 2: Start über py 
 @echo off
 :: Zeige Nachricht
 echo msgbox "Bitte Meldungen in der Console bearbeiten", vbInformation, "Programm start" > %temp%\meldung1.vbs

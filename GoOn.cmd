@@ -25,7 +25,7 @@ if not exist "venv\Scripts\activate.bat" (
 )
 call venv\Scripts\activate
 :: führe Skript aus
-call python "%~dp0rename.py"
+call python "%~dp0startpack.py"
 :: Zeige Abschlussnachricht
 echo msgbox "Die Verarbeitung ist Abgeschlossen.", vbInformation, "Programm ende" > %temp%\meldung2.vbs
 if exist %temp%\meldung2.vbs (
