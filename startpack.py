@@ -59,7 +59,8 @@ def main():
                 zielTarget, duration = rn.einlesen(quellTarget, zielTarget, low=True)
                 # command = f'python detect.py -p "{target_directory}" --expected_duration "{duration}"' # standart YOLOv8s, Konfidenzschwelle 0.25, IoU-Schwelle 0.45
                 # command = f'python detect.py -p "{target_directory}" --expected_duration "{duration}" -w yolov8m.pt --conf 0.1 --iou 0.6 ' # version 2: YOLOv8m, Konfidenzschwelle 0.1, IoU-Schwelle 0.6
-                command = f'python detect.py -p "{zielTarget}" --expected_duration "{duration}" -w yolo11m.pt --conf 0.1 --iou 0.6 ' # version 3: YOLOv11m, Konfidenzschwelle 0.1, IoU-Schwelle 0.6
+                # command = f'python detect.py -p "{zielTarget}" --expected_duration "{duration}" -w yolo11m.pt --conf 0.1 --iou 0.6 ' # version 3: YOLOv11m, Konfidenzschwelle 0.1, IoU-Schwelle 0.6
+                command = f'python detect.py -p "{zielTarget}" --expected_duration "{duration}" -w yolo11m.pt --conf 0.25 --iou 0.45 ' # version 3: YOLOv11m, Konfidenzschwelle 0.1, IoU-Schwelle 0.6
                 try:
                     subprocess.run(command, shell=True)
                 except Exception as e:
