@@ -1,4 +1,4 @@
-# Nutzbarmachung der Grfischen Schnittstelle 
+# Nutzbarmachung der grafischen Schnittstelle 
 ## Vorwort/ requirements ##
 Zum Nutzen der Schnittstelle der Grafikkarte sind folgende Installationen vorzunehmen:
 
