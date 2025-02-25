@@ -61,7 +61,7 @@ def rescale_files(directory, file, file_path, zielDirectory):
         # Pfadänderung zum Ordner
         new_file = os.path.join(directory, r'scale_videos', file)
     else:
-        working_path = os.path.join(zielDirectory) 
+        working_path = zielDirectory
         new_file = os.path.join(zielDirectory, file)
     # Zusatz Comand öffnen und ffmpeg ausführen
     comand = [
