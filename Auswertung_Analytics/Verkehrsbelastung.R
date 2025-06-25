@@ -41,7 +41,7 @@ d1 <- event %>%
   #geom_smooth(method="loess")+
   scale_x_continuous(labels = format_hhmm,)+
   labs(title = "Digitale Verkehrsauswertung - Ein und Ausfahrten Areal Böjler", 
-       subtitle = "03.06.2025",
+       subtitle = "12.06.2025",
        caption = paste("n =",format( nrow(event), big.mark = ".", decimal.mark = ",", scientific = FALSE)),
        x = "Uhrzeit",
        y = "Anzahl",
