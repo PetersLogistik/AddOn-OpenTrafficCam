@@ -10,16 +10,16 @@ def reduktion_df(file_path, sep=',') -> None:
     df_reduziert.to_csv(file_path.replace('.csv','_reduziert.csv', 1), index=False)
 
 def zusammenfassen() -> object:
-    s1 = r"D:\Erhebungen\06-2025 Böhler\02-06_06-00\Böhler02_6_00_2025-06-20_13-33-11.counts_15min.csv"
+    s1 = r"D:\Erhebungen\06-2025 Böhler\12-06_06-00\2025-06-25_15-21-20.counts_15min.csv"
     df1 = pd.read_csv(s1, sep=',', header=0, encoding='utf-8')
-    s2 = r"D:\Erhebungen\06-2025 Böhler\02-06_14-00\Böhler_2025-06-25_12-20-21.counts_15min.csv"
+    s2 = r"D:\Erhebungen\06-2025 Böhler\12-06_14-00\2025-06-25_15-26-49.counts_15min.csv"
     df2 = pd.read_csv(s2, sep=',', header=0, encoding='utf-8')
     df3 = pd.concat([df1, df2], axis=0, ignore_index=True)
-    df3.to_csv(r"D:\Erhebungen\06-2025 Böhler\Böhler02_06_2025.csv", index=False)
+    df3.to_csv(r"D:\Erhebungen\06-2025 Böhler\Böhler12_06_2025.csv", index=False)
 
 if __name__ == "__main__":
-    # zusammenfassen()
-    reduktion_df(r"D:\Erhebungen\06-2025 Böhler\Böhler_2025-06-12.counts_15min.csv")
+    zusammenfassen()
+    reduktion_df(r"D:\Erhebungen\06-2025 Böhler\Böhler12_06_2025.csv")
     # path = input('Dateipfad bitte Angeben: ')
     # try:
     #     reduktion_df(path)

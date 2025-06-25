@@ -11,7 +11,7 @@ library(hrbrthemes)
 library(scales)
 library(lubridate)
 
-file <- "D:/Erhebungen/06-2025 Böhler/Böhler_2025-06-12.counts_15min_reduziert.csv"
+file <- "D:/Erhebungen/06-2025 Böhler/Böhler12_06_2025_reduziert.csv"
 # Read the CSV file into R
 events <- read.csv(file, header = TRUE)
 
