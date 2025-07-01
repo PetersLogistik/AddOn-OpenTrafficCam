@@ -11,15 +11,24 @@ library(hrbrthemes)
 library(scales)
 library(lubridate)
 
-file <- "D:/Erhebungen/06-2025 Böhler/Böhler12_06_2025_reduziert.csv"
+date = "03.06.2025"
+out <- "D:/Erhebungen/06-2025 Böhler/Digitale_Verkehrsauswertung_03_06_2025_3.png"
+file <- paste0("D:/Erhebungen/06-2025 Böhler/Böhler03_06_2025_reduziert.csv")
 # Read the CSV file into R
 events <- read.csv(file, header = TRUE)
 
-format_hhmm <- function(x) {
-  format(as.POSIXct(x, format="%Y-%m-%d %H:%M:%S"), "%H:%M")
-}
+# Daten vorbereiten: Summen je Kategorie berechnen
+df <- events %>%
+  group_by(classification) %>%
+  summarise(summe = sum(count, na.rm = TRUE), .groups = "drop") %>%
+  filter(summe > 10) %>%
+  pull(classification)
+
+events <- events %>%
+  filter(classification %in% df, classification != "person")
 
 event = events %>%
+  filter(classification %in% df) %>%
   mutate(
     time = as.POSIXct(start.time, format="%Y-%m-%d %H:%M:%S")
   ) %>%
@@ -38,10 +47,14 @@ d1 <- event %>%
   ggplot(aes(x=time, y=anz, color=classification))+
   geom_point()+
   geom_line()+
-  #geom_smooth(method="loess")+
-  scale_x_continuous(labels = format_hhmm,)+
+  geom_label(aes(label = anz), nudge_y = 1, size = 3)+
+  scale_x_datetime(
+    breaks = seq(as.POSIXct(min(event$time)), as.POSIXct(max(event$time)), by = "1 hour"),
+    labels = date_format("%H:%M")
+    )+
+  #scale_x_continuous(labels = format_hhmm,)+
   labs(title = "Digitale Verkehrsauswertung - Ein und Ausfahrten Areal Böjler", 
-       subtitle = "12.06.2025",
+       subtitle = date,
        caption = paste("n =",format( nrow(event), big.mark = ".", decimal.mark = ",", scientific = FALSE)),
        x = "Uhrzeit",
        y = "Anzahl",
@@ -51,7 +64,6 @@ d1 <- event %>%
 
 d1
 
-out <- "D:/Erhebungen/06-2025 Böhler/Digitale_Verkehrsauswertung_12-06-2025_2.png"
 png(filename=paste0(out), width = 21, height = 14.8, res = 600, units = 'cm')#A5
 d1
 dev.off()
