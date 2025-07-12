@@ -18,8 +18,8 @@ def zusammenfassen() -> object:
     df3.to_csv(r"D:\Erhebungen\06-2025 Böhler\Böhler12_06_2025.csv", index=False)
 
 if __name__ == "__main__":
-    zusammenfassen()
-    reduktion_df(r"D:\Erhebungen\06-2025 Böhler\Böhler12_06_2025.csv")
+    #zusammenfassen()
+    reduktion_df(r"D:\Erhebungen\07-2025 Rheinbahn Düsseldorf\Video\01.07.2025\cam5\16-18Uhr\2025-07-12_14-54-45.counts_15min.csv")
     # path = input('Dateipfad bitte Angeben: ')
     # try:
     #     reduktion_df(path)

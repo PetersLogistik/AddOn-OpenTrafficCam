@@ -11,9 +11,9 @@ library(hrbrthemes)
 library(scales)
 library(lubridate)
 
-date = "03.06.2025"
-out <- "D:/Erhebungen/06-2025 Böhler/Digitale_Verkehrsauswertung_03_06_2025_3.png"
-file <- paste0("D:/Erhebungen/06-2025 Böhler/Böhler03_06_2025_reduziert.csv")
+date = "01.07.2025"
+out <- "D:/Erhebungen/07-2025 Rheinbahn Düsseldorf/Digitale_Verkehrsauswertung_01_07_2025.png"
+file <- paste0("D:/Erhebungen/07-2025 Rheinbahn Düsseldorf/Video/01.07.2025/cam1/7-10.15Uhr/123GOPRO/Rheinbahn_2025-07-03_15-06-57.counts_15min_reduziert.csv")
 # Read the CSV file into R
 events <- read.csv(file, header = TRUE)
 
@@ -48,12 +48,11 @@ d1 <- event %>%
   geom_point()+
   geom_line()+
   geom_label(aes(label = anz), nudge_y = 1, size = 3)+
-  scale_x_datetime(
-    breaks = seq(as.POSIXct(min(event$time)), as.POSIXct(max(event$time)), by = "1 hour"),
-    labels = date_format("%H:%M")
-    )+
+  #scale_x_datetime( breaks = seq(as.POSIXct(min(event$time)), as.POSIXct(max(event$time)), by = "1 hour"),
+  #  labels = date_format("%H:%M")
+   # )+
   #scale_x_continuous(labels = format_hhmm,)+
-  labs(title = "Digitale Verkehrsauswertung - Ein und Ausfahrten Areal Böjler", 
+  labs(title = "Digitale Verkehrsauswertung - Rheinbahn", 
        subtitle = date,
        caption = paste("n =",format( nrow(event), big.mark = ".", decimal.mark = ",", scientific = FALSE)),
        x = "Uhrzeit",
