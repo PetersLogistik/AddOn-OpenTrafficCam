@@ -12,8 +12,9 @@ library(scales)
 library(lubridate)
 
 date = "01.07.2025"
-out <- "D:/Erhebungen/07-2025 Rheinbahn Düsseldorf/Digitale_Verkehrsauswertung_01_07_2025.png"
-file <- paste0("D:/Erhebungen/07-2025 Rheinbahn Düsseldorf/Video/01.07.2025/cam1/7-10.15Uhr/123GOPRO/Rheinbahn_2025-07-03_15-06-57.counts_15min_reduziert.csv")
+out <- "D:/Erhebungen/07-2025 Rheinbahn Düsseldorf/Digitale_Verkehrsauswertung_01_07_2025_vormittag_cam1.png"
+pfad = "D:/Erhebungen/07-2025 Rheinbahn Düsseldorf/Video/01.07.2025/cam1/7-10.15Uhr/123GOPRO/Rheinbahn_2025-07-03_15-06-57.counts_15min_reduziert.csv"
+file <- paste0(pfad)
 # Read the CSV file into R
 events <- read.csv(file, header = TRUE)
 
@@ -24,17 +25,17 @@ df <- events %>%
   filter(summe > 10) %>%
   pull(classification)
 
-events <- events %>%
-  filter(classification %in% df, classification != "person")
+#events <- events %>%
+#  filter(classification %in% df, classification != "person")
 
 event = events %>%
   filter(classification %in% df) %>%
   mutate(
     time = as.POSIXct(start.time, format="%Y-%m-%d %H:%M:%S")
   ) %>%
-  filter(
-    from.section == "A" | to.section == "A"
-  ) %>%
+  #filter(
+  #  from.section == "A" | to.section == "A"
+  #) %>%
   group_by(
     classification, time
   ) %>%
