@@ -50,26 +50,27 @@ def get_video_len_ffprobe(video_path):
 
     return float(info['format']['duration'])
 
-def make_video_overlay(video_path, times=1690899780):
-    command = [""" ffmpeg -i """+ video_path
-        +""" -vf drawtext="fontfile=C\\:/Windows/Fonts/arial.ttf:text='%{pts\:localtime\:"""+ times
-        +"""\:%H\\\\\:%M\\\\\:%S}':fontcolor=white:fontsize=48:box=1:boxcolor=black@0.5:x=10:y=10" -codec:a """]
+def make_video_overlay(input_path, output_path, time=1690899780):
 
-    command = [
-        "ffprobe",
-        "-v", "error",
-        "-show_entries", "format=duration",
-        "-of", "json",
-        video_path
-    ]
-    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    info = json.loads(result.stdout)
+    # ffmpeg -i input.mp4 -vf drawtext="fontfile=C\\:/Windows/Fonts/arial.ttf:text=%{pts\\:gmtime\\:1754565600}:x=10:y=10:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.5" -codec:a copy output.mp4
+    font_path = "C\\:/Windows/Fonts/arial.ttf"
+
+    drawtext_filter = (
+        f'drawtext="fontfile=\'{font_path}\':'
+        f'text=\'%{{pts\:gmtime\:{time}}}\':'
+        'x=10:y=10:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.5"'
+    )
+    command = f'ffmpeg -i "{input_path}" -vf {drawtext_filter} -codec:a copy "{output_path}"'
+    
+    # Führe den Befehl aus
+    process = subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_CONSOLE)
+    process.wait()
 
 def einlesen(directory, datum_uhrzeit):
     # zuweisungen
     extensions = [".mp4", ".MP4"]
     v_len=0
-    anz=0
+    anz=0 
     datum_uhrzeit = datetime.strptime(datum_uhrzeit, '%d-%m-%Y %H-%M-%S')
     files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
     files.sort()
@@ -78,15 +79,17 @@ def einlesen(directory, datum_uhrzeit):
         _, ext = os.path.splitext(file)
         if ext.lower() in extensions: # Prüfe auf mp4 Video Datei -> True
             file_path = os.path.join(directory, file)
+            out_file = os.path.join(directory, 't_'+file)
             
             if datum_uhrzeit is not False: # wenn Datei mit Zeit versehen werden soll 
                 file = file.strip(ext)
                 file = file.split('_')[0]
                 neue_zeit = datum_uhrzeit + timedelta(seconds=v_len)
+                datum_unix = int(datum_uhrzeit.timestamp()*1000)
                 file = file + f"_{neue_zeit.strftime('%Y-%m-%d_%H-%M-%S')}.mp4"
             
-            # Videozeit addieren
-            v_len += get_video_len_ffprobe(file_path)
+            # Video mit Timestamp versehen
+            make_video_overlay(file_path, out_file, datum_unix)
             
             # rename
             # Einfache Umbenennung im gegebenen Ordner
@@ -98,6 +101,11 @@ def einlesen(directory, datum_uhrzeit):
             except Exception as e:
                 logging.warning(f"Ein Fehler (File) ist aufgetreten: {e}")
             anz+=1
+            
+            # Videozeit addieren
+            v_len += get_video_len_ffprobe(file_path)
+
+
 
     # Berechnung der Videozeit im Durchschnitt
     duration = round(v_len / anz, 0).as_integer_ratio()[0]
@@ -107,7 +115,7 @@ def einlesen(directory, datum_uhrzeit):
 
 def main(): 
     # Hauptablaufplan
-    target, log_path = abfrage_path() # D:\Erhebungen\07-2025 Rheinbahn Düsseldorf\Video\video.csv
+    target, log_path = abfrage_path() # D:\Erhebungen\2025-07 Rheinbahn Düsseldorf\Video\video.csv
     logging.basicConfig(
         filename=log_path+'_logdatei.log',   # Pfad zur Logdatei
         filemode='a',                    # 'a' = anhängen, 'w' = überschreiben
