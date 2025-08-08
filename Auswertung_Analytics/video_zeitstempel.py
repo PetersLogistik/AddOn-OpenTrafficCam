@@ -50,21 +50,29 @@ def get_video_len_ffprobe(video_path):
 
     return float(info['format']['duration'])
 
-def make_video_overlay(input_path, output_path, time=1690899780):
+def make_video_overlay(input_path:str, output_path:str, time:int) -> None:
 
     # ffmpeg -i input.mp4 -vf drawtext="fontfile=C\\:/Windows/Fonts/arial.ttf:text=%{pts\\:gmtime\\:1754565600}:x=10:y=10:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.5" -codec:a copy output.mp4
     font_path = "C\\:/Windows/Fonts/arial.ttf"
 
-    drawtext_filter = (
-        f'drawtext="fontfile=\'{font_path}\':'
-        f'text=\'%{{pts\:gmtime\:{time}}}\':'
-        'x=10:y=10:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.5"'
-    )
-    command = f'ffmpeg -i "{input_path}" -vf {drawtext_filter} -codec:a copy "{output_path}"'
+    # drawtext_filter = (
+    #     f'drawtext=fontfile=\'{font_path}\':'
+    #     f'text=\'%{{pts\\:gmtime\\:{time}}}\':'
+    #     'x=10:y=10:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.5'
+    # )
+    # command = f'ffmpeg -y -i "{input_path}" -vf {drawtext_filter} -codec:a copy "{output_path}"'
     
+    drawtext_filter = (
+        f'drawtext=fontfile=\'{font_path}\':'
+        f"text=\'%{{pts\\:localtime\\:{time}}}\':"
+        'x=10:y=10:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.5'
+    )
+    command = f'ffmpeg -y -i "{input_path}" -vf {drawtext_filter} -preset ultrafast -f mp4 -codec:a copy "{output_path}"'
+
     # Führe den Befehl aus
-    process = subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_CONSOLE)
-    process.wait()
+    process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=False)
+    # process = subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_CONSOLE, )
+    # process.wait()
 
 def einlesen(directory, datum_uhrzeit):
     # zuweisungen
@@ -76,8 +84,8 @@ def einlesen(directory, datum_uhrzeit):
     files.sort()
 
     for file in tqdm(files, position=1): # für jede Datei im Ordner
-        _, ext = os.path.splitext(file)
-        if ext.lower() in extensions: # Prüfe auf mp4 Video Datei -> True
+        pre, ext = os.path.splitext(file)
+        if ext.lower() in extensions and pre.split('_') [0] != 't': # Prüfe auf mp4 Video Datei -> True
             file_path = os.path.join(directory, file)
             out_file = os.path.join(directory, 't_'+file)
             
@@ -85,7 +93,8 @@ def einlesen(directory, datum_uhrzeit):
                 file = file.strip(ext)
                 file = file.split('_')[0]
                 neue_zeit = datum_uhrzeit + timedelta(seconds=v_len)
-                datum_unix = int(datum_uhrzeit.timestamp()*1000)
+                datum_unix = int(datum_uhrzeit.timestamp())
+
                 file = file + f"_{neue_zeit.strftime('%Y-%m-%d_%H-%M-%S')}.mp4"
             
             # Video mit Timestamp versehen
@@ -115,7 +124,7 @@ def einlesen(directory, datum_uhrzeit):
 
 def main(): 
     # Hauptablaufplan
-    target, log_path = abfrage_path() # D:\Erhebungen\2025-07 Rheinbahn Düsseldorf\Video\video.csv
+    target, log_path = abfrage_path() # D:\Erhebungen\2025-07 Rheinbahn Düsseldorf\Video\video.csv # D:\Erhebungen\CPM\video.csv
     logging.basicConfig(
         filename=log_path+'_logdatei.log',   # Pfad zur Logdatei
         filemode='a',                    # 'a' = anhängen, 'w' = überschreiben
@@ -125,7 +134,7 @@ def main():
     logging.info('Programm gestartet')
 
 # Vorlauf % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - %
-    for idx, quellTarget in tqdm(target.iterrows(),position=0):
+    for idx, quellTarget in tqdm(target.iterrows(),position=0,leave=True):
         logging.info(f'Durchlauf {idx+1} von {len(target)}')
 
 # Rename % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - %
