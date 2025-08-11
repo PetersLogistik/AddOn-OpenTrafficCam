@@ -124,7 +124,7 @@ def einlesen(directory, datum_uhrzeit):
 
 def main(): 
     # Hauptablaufplan
-    target, log_path = abfrage_path() # D:\Erhebungen\2025-07 Rheinbahn Düsseldorf\Video\video.csv # D:\Erhebungen\CPM\video.csv
+    target, log_path = abfrage_path() # D:\Erhebungen\2025-07 Rheinbahn Düsseldorf\Video\video3.csv # D:\Erhebungen\CPM\video.csv
     logging.basicConfig(
         filename=log_path+'_logdatei.log',   # Pfad zur Logdatei
         filemode='a',                    # 'a' = anhängen, 'w' = überschreiben
