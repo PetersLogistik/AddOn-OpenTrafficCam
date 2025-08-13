@@ -93,7 +93,7 @@ def einlesen(directory, datum_uhrzeit):
                 file = file.strip(ext)
                 file = file.split('_')[0]
                 neue_zeit = datum_uhrzeit + timedelta(seconds=v_len)
-                datum_unix = int(datum_uhrzeit.timestamp())
+                datum_unix = int(neue_zeit.timestamp())
 
                 file = file + f"_{neue_zeit.strftime('%Y-%m-%d_%H-%M-%S')}.mp4"
             
