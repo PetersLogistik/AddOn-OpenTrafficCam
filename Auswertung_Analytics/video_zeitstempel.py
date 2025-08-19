@@ -9,6 +9,7 @@ import json
 import logging
 import subprocess
 import pandas as pd
+from py import process
 from tqdm import tqdm
 from datetime import datetime, timedelta
 
@@ -51,17 +52,13 @@ def get_video_len_ffprobe(video_path):
     return float(info['format']['duration'])
 
 def make_video_overlay(input_path:str, output_path:str, time:int) -> None:
-
+    """
+    Erzeugt einen Zeitsempel in der Ecke des Videos. 
+    Der Inputpath darf dem Outputpath nicht gleichen.
+    """
     # ffmpeg -i input.mp4 -vf drawtext="fontfile=C\\:/Windows/Fonts/arial.ttf:text=%{pts\\:gmtime\\:1754565600}:x=10:y=10:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.5" -codec:a copy output.mp4
     font_path = "C\\:/Windows/Fonts/arial.ttf"
 
-    # drawtext_filter = (
-    #     f'drawtext=fontfile=\'{font_path}\':'
-    #     f'text=\'%{{pts\\:gmtime\\:{time}}}\':'
-    #     'x=10:y=10:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.5'
-    # )
-    # command = f'ffmpeg -y -i "{input_path}" -vf {drawtext_filter} -codec:a copy "{output_path}"'
-    
     drawtext_filter = (
         f'drawtext=fontfile=\'{font_path}\':'
         f"text=\'%{{pts\\:localtime\\:{time}}}\':"
@@ -74,15 +71,43 @@ def make_video_overlay(input_path:str, output_path:str, time:int) -> None:
     # process = subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_CONSOLE, )
     # process.wait()
 
+def one_video(directory:str, files:list, datum_uhrzeit:datetime, extensions:list) -> str:
+    """
+        Erstellt eine .txt über alle Videos in einem Ordner && erstellt ein einzelnes Video aus den Splitern.
+    """
+    file_zsm = os.path.join(directory, 'zsm.txt')
+    with open(file_zsm,'w', encoding="UTF-8") as zsm:
+        for file in tqdm(files, position=1):
+            pre, ext = os.path.splitext(file)
+            if ext.lower() in extensions and pre.split('_') [0] != 't': # Prüfe auf mp4 Video Datei -> True
+                zsm.write("file \'")
+                zsm.write(os.path.join(directory, file).replace("\\", "/"))
+                zsm.write("\'\n")
+
+    file_output = (os.path.join(directory, f"fullvideo_{datum_uhrzeit.strftime('%Y-%m-%d_%H-%M-%S')}.mp4")).replace("\\", "/")
+
+    command = ["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", file_zsm, "-c", "copy", file_output]
+    process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    
+    logging.debug(command)# zeigt den kompletten Befehl
+    logging.info(process.stdout) # zeigt ffmpeg-Ausgabe
+    logging.warning(process.stderr) # zeigt ffmpeg-Fehlermeldungen
+
+    return file_output
+
 def einlesen(directory, datum_uhrzeit):
     # zuweisungen
     extensions = [".mp4", ".MP4"]
-    v_len=0
-    anz=0 
+    v_len=anz=0
     datum_uhrzeit = datetime.strptime(datum_uhrzeit, '%d-%m-%Y %H-%M-%S')
     files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
     files.sort()
 
+    # erzeugt ein duchgehendes Video && setzt einen Zeitstempel an das Video
+    file_zsm = one_video(directory, files, datum_uhrzeit, extensions)
+    make_video_overlay(file_zsm, file_zsm.strip('.mp4')+'_timestamp.mp4', int(datum_uhrzeit.timestamp()))
+
+    #
     for file in tqdm(files, position=1): # für jede Datei im Ordner
         pre, ext = os.path.splitext(file)
         if ext.lower() in extensions and pre.split('_') [0] != 't': # Prüfe auf mp4 Video Datei -> True
@@ -98,7 +123,7 @@ def einlesen(directory, datum_uhrzeit):
                 file = file + f"_{neue_zeit.strftime('%Y-%m-%d_%H-%M-%S')}.mp4"
             
             # Video mit Timestamp versehen
-            make_video_overlay(file_path, out_file, datum_unix)
+            # make_video_overlay(file_path, out_file, datum_unix)
             
             # rename
             # Einfache Umbenennung im gegebenen Ordner
