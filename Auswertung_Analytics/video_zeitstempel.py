@@ -90,9 +90,9 @@ def one_video(directory:str, files:list, datum_uhrzeit:datetime, extensions:list
 
     # Startet die Shell und setzt die Splitter zusammen.
     command = ["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", file_zsm, "-c", "copy", file_output]
-    process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    # process = subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_CONSOLE, )
-    # process.wait()
+    # process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    process = subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_CONSOLE, )
+    process.wait()
 
     logging.debug(command)# zeigt den kompletten Befehl
     logging.info(process.stdout) # zeigt ffmpeg-Ausgabe
