@@ -48,8 +48,10 @@ def get_video_len_ffprobe(video_path):
     ]
     result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     info = json.loads(result.stdout)
-
-    return float(info['format']['duration'])
+    try:
+        return float(info['format']['duration'])
+    except:
+        return 0
 
 def make_video_overlay(input_path:str, output_path:str, time:int) -> None:
     """
@@ -71,7 +73,7 @@ def make_video_overlay(input_path:str, output_path:str, time:int) -> None:
     # process = subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_CONSOLE, )
     # process.wait()
 
-def one_video(directory:str, files:list, datum_uhrzeit:datetime, extensions:list) -> str:
+def one_video(directory:str, files:list, datum_uhrzeit:datetime, extensions:list) -> None:
     """
         Erstellt eine .txt über alle Videos in einem Ordner && erstellt ein einzelnes Video aus den Splitern.
     """
@@ -86,14 +88,32 @@ def one_video(directory:str, files:list, datum_uhrzeit:datetime, extensions:list
 
     file_output = (os.path.join(directory, f"fullvideo_{datum_uhrzeit.strftime('%Y-%m-%d_%H-%M-%S')}.mp4")).replace("\\", "/")
 
+    # Startet die Shell und setzt die Splitter zusammen.
     command = ["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", file_zsm, "-c", "copy", file_output]
     process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    
+    # process = subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_CONSOLE, )
+    # process.wait()
+
     logging.debug(command)# zeigt den kompletten Befehl
     logging.info(process.stdout) # zeigt ffmpeg-Ausgabe
     logging.warning(process.stderr) # zeigt ffmpeg-Fehlermeldungen
 
-    return file_output
+    if os.path.exists(file_zsm): # Entfernt die Datei, wenn sie vorhanden ist.
+        os.remove(file_zsm)
+        logging.info(f'Textdatei {file_zsm} erfolgreich gelöscht.')
+    else:
+        logging.warning(f'Textdatei {file_zsm} nicht gefunden.')
+    
+    # setzt einen Zeitstempel an das Video
+    make_video_overlay(file_output, file_output.strip('.mp4')+'_timestamp.mp4', int(datum_uhrzeit.timestamp()))
+    
+    if os.path.exists(file_output): # Entfernt die Datei, wenn sie vorhanden ist.
+        os.remove(file_output)
+        logging.info(f'Video {file_output} erfolgreich gelöscht.')
+    else:
+        logging.warning(f'Video {file_output} nicht gefunden.')
+
+    return None
 
 def einlesen(directory, datum_uhrzeit):
     # zuweisungen
@@ -103,14 +123,14 @@ def einlesen(directory, datum_uhrzeit):
     files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
     files.sort()
 
-    # erzeugt ein duchgehendes Video && setzt einen Zeitstempel an das Video
-    file_zsm = one_video(directory, files, datum_uhrzeit, extensions)
-    make_video_overlay(file_zsm, file_zsm.strip('.mp4')+'_timestamp.mp4', int(datum_uhrzeit.timestamp()))
-
+    # erzeugt ein duchgehendes Video && 
+    one_video(directory, files, datum_uhrzeit, extensions)
+    
+    return None
     #
     for file in tqdm(files, position=1): # für jede Datei im Ordner
         pre, ext = os.path.splitext(file)
-        if ext.lower() in extensions and pre.split('_') [0] != 't': # Prüfe auf mp4 Video Datei -> True
+        if ext.lower() in extensions and pre.split('_') [0] not in ('t', 'fullvideo'): # Prüfe auf mp4 Video Datei -> True
             file_path = os.path.join(directory, file)
             out_file = os.path.join(directory, 't_'+file)
             
