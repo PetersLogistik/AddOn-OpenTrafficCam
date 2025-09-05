@@ -10,6 +10,8 @@ import logging
 import subprocess
 import pandas as pd
 from py import process
+from pydash import times
+from torch import obj
 from tqdm import tqdm
 from datetime import datetime, timedelta
 
@@ -73,7 +75,15 @@ def make_video_overlay(input_path:str, output_path:str, time:int) -> None:
     # process = subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_CONSOLE, )
     # process.wait()
 
-def one_video(directory:str, files:list, datum_uhrzeit:datetime, extensions:list) -> None:
+    if os.path.exists(input_path): # Entfernt die Datei, wenn sie vorhanden ist.
+        os.remove(input_path)
+        logging.info(f'Video {input_path} erfolgreich gelöscht.')
+    else:
+        logging.warning(f'Video {input_path} nicht gefunden.')
+    
+    return None
+
+def one_video(directory:str, files:list, datum_uhrzeit:datetime, extensions:list) -> object:
     """
         Erstellt eine .txt über alle Videos in einem Ordner && erstellt ein einzelnes Video aus den Splitern.
     """
@@ -104,28 +114,60 @@ def one_video(directory:str, files:list, datum_uhrzeit:datetime, extensions:list
     else:
         logging.warning(f'Textdatei {file_zsm} nicht gefunden.')
     
-    # setzt einen Zeitstempel an das Video
-    make_video_overlay(file_output, file_output.strip('.mp4')+'_timestamp.mp4', int(datum_uhrzeit.timestamp()))
+    return file_output.strip('.mp4')+'_timestamp.mp4', datum_uhrzeit.strftime('%Y-%m-%d_%H-%M-%S')
+
+def short_video(file:str, sollzeit:datetime, endzeit:datetime) -> None:
     
-    if os.path.exists(file_output): # Entfernt die Datei, wenn sie vorhanden ist.
-        os.remove(file_output)
-        logging.info(f'Video {file_output} erfolgreich gelöscht.')
-    else:
-        logging.warning(f'Video {file_output} nicht gefunden.')
+    # # Prüfen auf negative Zeit
+    # if int(sollzeit.total_seconds()) < 0:
+    #     sollzeit = format_timedelta_hhmm(timedelta(hours=0, minutes=0, seconds=0))
+    
+    # Vor- und Nachlaufzeit
+    sollzeit = format_timedelta(sollzeit - timedelta(seconds=30))
+    endzeit = format_timedelta(endzeit + timedelta(seconds=30))
+
+    output = file.strip('_timestamp.mp4')+'.mp4'
+    # Startet die Shell und schneidet ab.
+    command = ["ffmpeg", "-y", "-ss", sollzeit, "-to", endzeit, "-i", file, "-acodec", "copy", "-vcodec", "copy", output]
+    # process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    process = subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_CONSOLE)
+    process.wait()
+
+    logging.debug(command)# zeigt den kompletten Befehl
+    logging.info(process.stdout) # zeigt ffmpeg-Ausgabe
+    logging.warning(process.stderr) # zeigt ffmpeg-Fehlermeldungen
 
     return None
 
-def einlesen(directory, datum_uhrzeit):
+def format_timedelta(td):
+    total_seconds = int(td.total_seconds())
+    hours, remainder = divmod(total_seconds, 3600)
+    minutes, _ = divmod(remainder, 60)
+    seconds = total_seconds % 60
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+
+def einlesen(directory, datum_uhrzeit, begin_zeit:str, ende_zeit:str):
     # zuweisungen
     extensions = [".mp4", ".MP4"]
     v_len=anz=0
     datum_uhrzeit = datetime.strptime(datum_uhrzeit, '%d-%m-%Y %H-%M-%S')
+    soll_zeit = datetime.strptime(datum_uhrzeit.date().strftime('%Y-%m-%d') + ' ' + begin_zeit, '%Y-%m-%d %H-%M') - datum_uhrzeit
+    end_zeit = ((datetime.strptime(datum_uhrzeit.date().strftime('%Y-%m-%d') + ' ' + ende_zeit, '%Y-%m-%d %H-%M') - 
+                datetime.strptime(datum_uhrzeit.date().strftime('%Y-%m-%d') + ' ' + begin_zeit, '%Y-%m-%d %H-%M')) + 
+               (datetime.strptime(datum_uhrzeit.date().strftime('%Y-%m-%d') + ' ' + begin_zeit, '%Y-%m-%d %H-%M') - datum_uhrzeit))
     files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
     files.sort()
 
     # erzeugt ein duchgehendes Video && 
-    one_video(directory, files, datum_uhrzeit, extensions)
+    # file_output, ist_zeit = one_video(directory, files, datum_uhrzeit, extensions)
+
+    # setzt einen Zeitstempel an das Video
+    # make_video_overlay(file_output, output_filev, int(datum_uhrzeit.timestamp()))
     
+    # Kürzt das Video auf die Untersuchungszeit
+    file_output = (os.path.join(directory, f"fullvideo_{datum_uhrzeit.strftime('%Y-%m-%d_%H-%M-%S')}_timestamp.mp4")).replace("\\", "/")
+    short_video(file_output, soll_zeit, end_zeit)
+
     return None
     #
     for file in tqdm(files, position=1): # für jede Datei im Ordner
@@ -172,7 +214,7 @@ def main():
     target, log_path = abfrage_path() # D:\Erhebungen\2025-07 Rheinbahn Düsseldorf\Video\video3.csv # D:\Erhebungen\CPM\video.csv
     logging.basicConfig(
         filename=log_path+'_logdatei.log',   # Pfad zur Logdatei
-        filemode='a',                    # 'a' = anhängen, 'w' = überschreiben
+        filemode='w',                    # 'a' = anhängen, 'w' = überschreiben
         format='%(asctime)s - %(levelname)s - %(message)s',
         level=logging.INFO               # Log-Level: DEBUG, INFO, WARNING, ERROR, CRITICAL
     )
@@ -184,10 +226,7 @@ def main():
 
 # Rename % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - % - %
         logging.info(f"Starting Rename: {datetime.now()}")
-        einlesen(directory=quellTarget['pfad'], datum_uhrzeit=quellTarget['zeit'])
-
-
-
+        einlesen(directory=quellTarget['pfad'], datum_uhrzeit=quellTarget['zeit'], begin_zeit=quellTarget['begin'], ende_zeit=quellTarget['ende'])
 
 if __name__ == "__main__":
     main()
