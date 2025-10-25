@@ -11,9 +11,9 @@ library(hrbrthemes)
 library(scales)
 library(lubridate)
 
-date = "01.07.2025"
-out <- "D:/Erhebungen/2025-07 Rheinbahn Düsseldorf/Digitale_Verkehrsauswertung_01_07_2025_vormittag_cam1.png"
-pfad = "D:/Erhebungen/2025-07 Rheinbahn Düsseldorf/Video/01.07.2025/cam1/7-10.15Uhr/Rheinbahn_2025-07-03_15-06-57.counts_15min_reduziert.csv"
+date = "14.10.2025"
+out <- "D:/Erhebungen/2025-10 Kiel/Knoten 1/Digitale_Verkehrsauswertung_14_10_2025_nachmittag_knoten1.png"
+pfad = "D:/Erhebungen/2025-10 Kiel/Knoten 1/14 Uhr/2025-10-21_15-12-13.counts_15min_reduziert.csv"
 file <- paste0(pfad)
 # Read the CSV file into R
 events <- read.csv(file, header = TRUE)
@@ -53,9 +53,9 @@ d1 <- event %>%
   #  labels = date_format("%H:%M")
    # )+
   #scale_x_continuous(labels = format_hhmm,)+
-  labs(title = "Digitale Verkehrsauswertung - Rheinbahn", 
+  labs(title = "Digitale Verkehrsauswertung - Kiel", 
        subtitle = date,
-       caption = paste("n =",format( nrow(event), big.mark = ".", decimal.mark = ",", scientific = FALSE)),
+       caption = paste("n = ","None"),#,format( nrow(event), big.mark = ".", decimal.mark = ",", scientific = FALSE)),
        x = "Uhrzeit",
        y = "Anzahl",
        color = "Farzeugart") +
