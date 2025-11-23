@@ -10,8 +10,8 @@ import logging
 import subprocess
 import pandas as pd
 from py import process
-from pydash import times
-from torch import obj
+# from pydash import times
+# from torch import obj
 from tqdm import tqdm
 from datetime import datetime, timedelta
 
@@ -159,14 +159,14 @@ def einlesen(directory, datum_uhrzeit, begin_zeit:str, ende_zeit:str):
     files.sort()
 
     # erzeugt ein duchgehendes Video && 
-    # file_output, ist_zeit = one_video(directory, files, datum_uhrzeit, extensions)
-
+    file_output, ist_zeit = one_video(directory, files, datum_uhrzeit, extensions)
+    output_filev = file_output + '_time'
     # setzt einen Zeitstempel an das Video
-    # make_video_overlay(file_output, output_filev, int(datum_uhrzeit.timestamp()))
+    make_video_overlay(file_output, output_filev, int(datum_uhrzeit.timestamp()))
     
     # Kürzt das Video auf die Untersuchungszeit
-    file_output = (os.path.join(directory, f"fullvideo_{datum_uhrzeit.strftime('%Y-%m-%d_%H-%M-%S')}_timestamp.mp4")).replace("\\", "/")
-    short_video(file_output, soll_zeit, end_zeit)
+    # file_output = (os.path.join(directory, f"fullvideo_{datum_uhrzeit.strftime('%Y-%m-%d_%H-%M-%S')}_timestamp.mp4")).replace("\\", "/")
+    # short_video(file_output, soll_zeit, end_zeit)
 
     return None
     #
