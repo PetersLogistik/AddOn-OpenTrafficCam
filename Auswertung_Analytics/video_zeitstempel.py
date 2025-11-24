@@ -55,7 +55,7 @@ def get_video_len_ffprobe(video_path):
     except:
         return 0
 
-def make_video_overlay(input_path:str, output_path:str, time:int) -> None:
+def make_video_overlay(input_path:str, time:int) -> None:
     """
     Erzeugt einen Zeitsempel in der Ecke des Videos. 
     Der Inputpath darf dem Outputpath nicht gleichen.
@@ -68,10 +68,15 @@ def make_video_overlay(input_path:str, output_path:str, time:int) -> None:
         f"text=\'%{{pts\\:localtime\\:{time}}}\':"
         'x=10:y=10:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.5'
     )
+    output_path = input_path.strip('.mp4')+'_timestamp.mp4'
     command = f'ffmpeg -y -i "{input_path}" -vf {drawtext_filter} -preset ultrafast -f mp4 -codec:a copy "{output_path}"'
 
     # Führe den Befehl aus
     process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=False)
+    logging.debug(command)
+    logging.critical(process)
+    logging.info(process.stdout) # zeigt Ausgabe
+    logging.warning(process.stderr) # zeigt Fehlermeldungen
     # process = subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_CONSOLE, )
     # process.wait()
 
@@ -101,6 +106,7 @@ def one_video(directory:str, files:list, datum_uhrzeit:datetime, extensions:list
     # Startet die Shell und setzt die Splitter zusammen.
     command = ["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", file_zsm, "-c", "copy", file_output]
     # process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    # logging.info(process)
     process = subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_CONSOLE, )
     process.wait()
 
@@ -114,7 +120,7 @@ def one_video(directory:str, files:list, datum_uhrzeit:datetime, extensions:list
     else:
         logging.warning(f'Textdatei {file_zsm} nicht gefunden.')
     
-    return file_output.strip('.mp4')+'_timestamp.mp4', datum_uhrzeit.strftime('%Y-%m-%d_%H-%M-%S')
+    return file_output, datum_uhrzeit.strftime('%Y-%m-%d_%H-%M-%S')
 
 def short_video(file:str, sollzeit:datetime, endzeit:datetime) -> None:
     
@@ -160,9 +166,9 @@ def einlesen(directory, datum_uhrzeit, begin_zeit:str, ende_zeit:str):
 
     # erzeugt ein duchgehendes Video && 
     file_output, ist_zeit = one_video(directory, files, datum_uhrzeit, extensions)
-    output_filev = file_output + '_time'
+    
     # setzt einen Zeitstempel an das Video
-    make_video_overlay(file_output, output_filev, int(datum_uhrzeit.timestamp()))
+    make_video_overlay(file_output, int(datum_uhrzeit.timestamp()))
     
     # Kürzt das Video auf die Untersuchungszeit
     # file_output = (os.path.join(directory, f"fullvideo_{datum_uhrzeit.strftime('%Y-%m-%d_%H-%M-%S')}_timestamp.mp4")).replace("\\", "/")
