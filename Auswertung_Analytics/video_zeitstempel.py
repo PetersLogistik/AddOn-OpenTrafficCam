@@ -74,7 +74,7 @@ def make_video_overlay(input_path:str, time:int) -> None:
     # Führe den Befehl aus
     process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=False)
     logging.debug(command)
-    logging.critical(process)
+    # logging.critical(process)
     logging.info(process.stdout) # zeigt Ausgabe
     logging.warning(process.stderr) # zeigt Fehlermeldungen
     # process = subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_CONSOLE, )
@@ -116,7 +116,7 @@ def one_video(directory:str, files:list, datum_uhrzeit:datetime, extensions:list
 
     if os.path.exists(file_zsm): # Entfernt die Datei, wenn sie vorhanden ist.
         os.remove(file_zsm)
-        logging.info(f'Textdatei {file_zsm} erfolgreich gelöscht.')
+        logging.info(f'Textdatei {file_zsm} erfolgreich geloescht.')
     else:
         logging.warning(f'Textdatei {file_zsm} nicht gefunden.')
     
