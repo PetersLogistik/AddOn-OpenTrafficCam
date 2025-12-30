@@ -19,13 +19,13 @@ if not exist "%PATH_TO_OT%\OTVision" (
 cd "%PATH_TO_OT%\OTVision"
 echo start OTVision
 :: Aktiviere virtuelles Py-Umfeld
-if not exist "venv\Scripts\activate.bat" (
+if not exist ".venv\Scripts\activate.bat" (
     echo Virtuelles Python-Umfeld nicht gefunden.
     exit /b
 )
-call venv\Scripts\activate
+call .venv\Scripts\activate
 :: führe Skript aus
-call python "%~dp0conf_iou_test.py"
+call python "%~dp0startpack.py"
 :: Zeige Abschlussnachricht
 echo msgbox "Die Verarbeitung ist Abgeschlossen.", vbInformation, "Programm ende" > %temp%\meldung2.vbs
 if exist %temp%\meldung2.vbs (

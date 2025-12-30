@@ -2,9 +2,7 @@
 :: Auf bestimmte Python Version prüfen
 FOR /F "tokens=* USEBACKQ" %%F IN (`python --version`) DO SET PYTHON_VERSION=%%F
 echo %PYTHON_VERSION%
-if "x%PYTHON_VERSION:3.11=%"=="x%PYTHON_VERSION%" (
-    echo "Python Version 3.11 is not installed in environment." & cmd /K & exit
-)
+
 :: holt sich den Pfad zu OT
 set PATH_TO_OT=%OT_PATH%
 if "%OT_PATH%"=="" (
@@ -23,10 +21,12 @@ if not exist "%PATH_TO_OT%\OTAnalytics" (
     echo Verzeichnis "%PATH_TO_OT%\OTAnalytics" wurde nicht gefunden.
     exit /b
 )
+start_gui.cmd
+
 :: Aktiviere virtuelles Py-Umfeld
-call venv\Scripts\activate
-python -m OTAnalytics %*
+::call .venv\Scripts\activate
+::python -m OTAnalytics %*
 :: Beende alles
-deactivate
+::deactivate
 :: Console schließen
 exit

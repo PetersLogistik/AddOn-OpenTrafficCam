@@ -19,7 +19,7 @@ def zusammenfassen() -> object:
 
 if __name__ == "__main__":
     #zusammenfassen()
-    reduktion_df(r"D:\Erhebungen\2025-10 Kiel\Knoten 2\22 Uhr oben\knoten2_21_2025-10-29_15-16-12.counts_15min.csv")
+    reduktion_df(r"D:\OpenTrafic\TestVideo\5\2025-12-30_15-43-09.counts_15min.csv")
     # path = input('Dateipfad bitte Angeben: ')
     # try:
     #     reduktion_df(path)
