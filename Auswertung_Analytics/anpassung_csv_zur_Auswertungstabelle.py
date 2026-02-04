@@ -521,7 +521,7 @@ def firstpage(file, minutes=15):
 
 if __name__ == "__main__":
     # 
-    fs = [r"D:\Erhebungen\2024-11 Bochum Langendreh\S1b\101GOPRO\BLD_2026-01-22_18-21-16.counts_15min_reduziert.csv",
+    fs = [r"D:\Erhebungen\2026-01 Bochum Langendreh\Cam1\2026-02-01_13-17-45.counts_15min.csv",
           ]
     # fs = [r"F:\knoten2_2025-10-29_11-14-55.counts_15min_reduziert.csv",
     #       r"F:\knoten2_06_2025-10-29_10-07-42.counts_15min_reduziert.csv",
