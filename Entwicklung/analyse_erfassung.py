@@ -1,101 +1,147 @@
-import sys
-from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale, QMetaObject, QObject, QPoint, QRect, QSize, QTime, QUrl, Qt)
-from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QGradient, QIcon, QImage, QKeySequence, QLinearGradient, QPainter, QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QFileDialog, QTableView, QApplication, QFrame, QDateTimeEdit, QHBoxLayout, QHeaderView, QMainWindow, QMenuBar, QProgressBar, QPushButton, QSizePolicy, QStatusBar, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget, QMainWindow)
+import sys, os
+import re
+from datetime import datetime
+from mainUi_ui import Ui_MainWindow
+from PySide6.QtWidgets import QApplication, QFileDialog, QWidget, QTableWidgetItem, QHeaderView, QSizePolicy, QMainWindow
 
-class Ui_Erfassung(QWidget):
-    def setupUi(self, MainWindow):
-        if not MainWindow.objectName():
-            MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(800, 600)
-        self.centralwidget = QWidget(MainWindow)
-        self.centralwidget.setObjectName(u"centralwidget")
+class Ui_Erfassung(QMainWindow, Ui_MainWindow):
+    # https://doc.qt.io/
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.addButton.clicked.connect(self.ordnerAuswahl)
+        self.reloadButton.clicked.connect(self.resetTime)
+        self.startButton.clicked.connect(self.makeCSV)
+
+        # Staus anzeigen.
+        self.statusBar().showMessage("Bereit")
+
+    def disableAll(self):
+        self.addButton.setDisabled(True)
+        self.renameBox.setDisabled(True)
+        self.reloadButton.setDisabled(True)
+        self.tableWidget.setDisabled(True)
+        self.vidoezeitBox.setDisabled(True)
+        self.oneVideoBox.setDisabled(True)
+        self.trackBox.setDisabled(True)
+        self.detectBox.setDisabled(True)
+        self.rErgBox.setDisabled(True)
+        self.excelBox.setDisabled(True)
+        self.startButton.setDisabled(True)
+
+    def enableAll(self):
+        self.addButton.setDisabled(False)
+        self.renameBox.setDisabled(False)
+        self.reloadButton.setDisabled(False)
+        self.tableWidget.setDisabled(False)
+        self.vidoezeitBox.setDisabled(False)
+        self.oneVideoBox.setDisabled(False)
+        self.trackBox.setDisabled(False)
+        self.detectBox.setDisabled(False)
+        self.rErgBox.setDisabled(False)
+        self.excelBox.setDisabled(False)
+        self.startButton.setDisabled(False)
+
+    def ordnerAuswahl(self):
+        """
+            Diese Funktion liest alle Videos in einem Ordner, der vom Nutzer bestimmt wurde, aus und gibt die Videos in der Tabelle an.
+        """
+        extensions = [".mp4", ".MP4", ".avi",".mkv",".mov"]
+        try: # Null-Fehler abfangen.
+            directory = QFileDialog.getExistingDirectory(self, "Ordner wählen", "")
+        except FileNotFoundError as e:
+            print(f"Fehler: Pfad nicht gefunden - {e}")
+        except Exception as e:
+            print(f"Anderer Fehler: {e}")
+        else:
+            # dateien, _ = QFileDialog.getOpenFileNames(self, "Dateien öffnen", "", "Alle Dateien (*);;Python-Dateien (*.py)")
+            files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
+            files.sort()
+
+            for file in files: # für jede Datei im Ordner
+                _, ext = os.path.splitext(file)
+                if ext.lower() in extensions: # Prüfe auf mp4 Video Datei -> True
+                    file_path = os.path.join(directory, file)
+                    # Uhrzeit des Vidoes
+                    date = str(self.extrahiere_datum(file))
+
+                    # Neue Zeile am Ende hinzufügen
+                    rowPosition = self.tableWidget.rowCount()
+                    self.tableWidget.insertRow(rowPosition)
+
+                    # Item erstellen und einfügen
+                    self.tableWidget.setItem(rowPosition, 0, QTableWidgetItem(date))
+                    self.tableWidget.setItem(rowPosition, 1, QTableWidgetItem(file))
+                    self.tableWidget.setItem(rowPosition, 2, QTableWidgetItem(file_path))
+    
+    def extrahiere_datum(self, dateiname):
+        """
+            Diese Funktion ermittelt bei den Videos eine Uhrzeit und gibt diese zurück.
+        """
+        # Muster für "video_2026-02-24_07-00-27.mp4"
+        muster = r"video_(\d{4})-(\d{2})-(\d{2})_(\d{2})-(\d{2})-(\d{2})"
         
-        self.horizontalLayoutWidget = QWidget(self.centralwidget)
-        self.horizontalLayoutWidget.setObjectName(u"horizontalLayoutWidget")
-        self.horizontalLayoutWidget.setGeometry(QRect(0, 0, 271, 31))
-        self.horizontalLayout = QHBoxLayout(self.horizontalLayoutWidget)
-        self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
-        # Button - Add
-        self.pushButton1 = QPushButton(self.horizontalLayoutWidget)
-        self.pushButton1.setObjectName(u"Add")
-        self.pushButton1.clicked.connect(self.onOpen)
-        self.horizontalLayout.addWidget(self.pushButton1)
-        # Button - Time
-        self.pushButton2 = QPushButton(self.horizontalLayoutWidget)
-        self.pushButton2.setObjectName(u"time")
-        self.pushButton2.setDisabled(True)
-        self.horizontalLayout.addWidget(self.pushButton2)
-
-        self.tableWidget = QTableWidget(self.centralwidget)
-        if (self.tableWidget.columnCount() < 2):
-            self.tableWidget.setColumnCount(2)
-        __qtablewidgetitem = QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(0, __qtablewidgetitem)
-        __qtablewidgetitem1 = QTableWidgetItem()
-        self.tableWidget.setHorizontalHeaderItem(1, __qtablewidgetitem1)
-        self.tableWidget.setObjectName(u"tableWidget")
-        self.tableWidget.setGeometry(QRect(10, 30, 250, 200))
+        treffer = re.search(muster, dateiname)
+        if treffer:
+            jahr, monat, tag, stunde, minute, sekunde = treffer.groups()
+            datum = datetime(int(jahr), int(monat), int(tag), int(stunde), int(minute), int(sekunde))
+            return datum
+        try:
+            timestamp = os.path.getmtime(dateiname)
+            return datetime.fromtimestamp(timestamp)
+        except:
+            return None
         
-        self.line = QFrame(self.centralwidget)
-        self.line.setObjectName(u"line")
-        self.line.setGeometry(QRect(10, 230, 801, 31))
-        self.line.setFrameShape(QFrame.Shape.HLine)
-        self.line.setFrameShadow(QFrame.Shadow.Sunken)
-        
-        self.tableView = QTableView(self.centralwidget)
-        self.tableView.setObjectName(u"tableView")
-        self.tableView.setGeometry(QRect(10, 300, 256, 192))
+    def get_input(self):
+        """
+            Hierin wird der Ablauf bestimmt, der stattfindet, wenn auf Start gedrückt wird.
+        """
+        self.disableAll
+        if self.oneVideoBox.isChecked() is True:
+            pass
+        self.makeCSV()
+        # self.detectBox.isChecked()
+        # self.trackBox.isChecked()
+        if self.rErgBox.isChecked() is True:
+            pass
+        if self.excelBox.isChecked() is True:
+            pass
+        self.enableAll
+    
+    def resetTime(self):
+        """
+            Wenn keine Uhrzeit angegeben ist, dann soll eine Zeit eingegeben werden. Diese Funktion führt errechnet die folgezeiten für alle leeren Zeitkästen & bennet die Dateien um.
+        """
+        self.disableAll
+        table = self.tableWidget
+        item = table.item(0, 0)
+        # for row in range(1,table.rowCount()-1):
+        #     self.tableWidget.setItem(row, 0, QTableWidgetItem(date))
+        self.enableAll
 
-        MainWindow.setCentralWidget(self.centralwidget)
-        self.statusbar = QStatusBar(MainWindow)
-        self.statusbar.setObjectName(u"statusbar")
-        MainWindow.setStatusBar(self.statusbar)
+    def get_table_data(self, table):
+        """
+            Diese Funktion liest alle items aus der Tabelle in der GUI aus.
+        """
+        daten = []
+        for row in range(table.rowCount()):
+            zeile = []
+            for col in range(table.columnCount()):
+                item = table.item(row, col)
+                zeile.append(item.text() if item else "")
+            daten.append(zeile)
+        return daten
 
-        self.retranslateUi(MainWindow)
-
-        QMetaObject.connectSlotsByName(MainWindow)
-    # def __init__(self):
-    #     super().__init__()
-    #     self.initUI()
-
-    # def initUI(self):
-    #     layout = QVBoxLayout()
-    #     layout_Serien = QHBoxLayout(self.layout)
-    #     self.openButton = QPushButton("Ordner hinzufügen")
-    #     layout_Serien.addWidget(self.openButton)
-    #     self.openButton.clicked.connect(self.onOpen)
-
-    #     self.openButton2 = QPushButton("Uhrzeit und Datum ändern")
-    #     layout_Serien.addWidget(self.openButton2)
-    #     # self.openButton2.clicked.connect(self.onOpen)
-
-    #     self.listWidget = QListWidget()
-    #     layout.addWidget(self.listWidget)
-        
-        
-
-    #     self.setLayout(layout)
-    #     self.setWindowTitle("Dateipfade anzeigen")
-    #     self.resize(400, 300)
-
-    def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
-        self.pushButton1.setText(QCoreApplication.translate("MainWindow", u"Add", None))
-        self.pushButton2.setText(QCoreApplication.translate("MainWindow", u"Zeit", None))
-        ___qtablewidgetitem = self.tableWidget.horizontalHeaderItem(0)
-        ___qtablewidgetitem.setText(QCoreApplication.translate("MainWindow", u"Zeit", None));
-        ___qtablewidgetitem1 = self.tableWidget.horizontalHeaderItem(1)
-        ___qtablewidgetitem1.setText(QCoreApplication.translate("MainWindow", u"Zeiten", None));
-
-    def onOpen(self):
-        ordner = QFileDialog.getExistingDirectory(self)
-        # self.listWidget.addItem(ordner)
-        self.tableView.setItem(0,0, ordner)
-        self.tableView.show()
-        
+    def makeCSV(self):
+        """
+            Diese Funktion erzeuget eine CSV-Datei, die der Detect und Track-Funktion übergeben wird. Anhand dieser kann OTC ausgefürht werden.
+        """
+        daten = self.get_table_data(self.tableWidget)
 
 if __name__ == '__main__':
-    import main
-    main()
+    app = QApplication(sys.argv)
+
+    window = Ui_Erfassung()
+    window.show()
+
+    sys.exit(app.exec())
