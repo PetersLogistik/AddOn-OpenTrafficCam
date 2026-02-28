@@ -80,13 +80,13 @@ def rescale_files(directory, file, file_path, zielDirectory):
         print(f"Ein Fehler ist (in Scale) aufgetreten: {e}, \n {comander}") 
     return working_path
 
-def rename(directory, file, file_path):
+def rename(directory, new_file_name, old_file_path):
     # Einfache Umbenennung im gegebenen Ordner
-    new_file = os.path.join(directory, file)
+    new_file = os.path.join(directory, new_file_name)
     try:
-        os.rename(file_path, new_file)
+        os.rename(old_file_path, new_file)
     except FileNotFoundError:
-        print(f"Die Datei '{file_path}' wurde nicht gefunden.")
+        print(f"Die Datei '{old_file_path}' wurde nicht gefunden.")
     except Exception as e:
         print(f"Ein Fehler (File) ist aufgetreten: {e}")
     return directory

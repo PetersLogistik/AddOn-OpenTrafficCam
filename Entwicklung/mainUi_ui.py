@@ -15,17 +15,17 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QAbstractScrollArea, QApplication, QCheckBox, QFrame,
-    QHBoxLayout, QHeaderView, QMainWindow, QProgressBar,
-    QPushButton, QSizePolicy, QSpacerItem, QStatusBar,
-    QTabWidget, QTableWidget, QTableWidgetItem, QVBoxLayout,
-    QWidget)
+from PySide6.QtWidgets import (QAbstractScrollArea, QApplication, QCheckBox, QComboBox,
+    QDoubleSpinBox, QFrame, QHBoxLayout, QHeaderView,
+    QLabel, QMainWindow, QProgressBar, QPushButton,
+    QSizePolicy, QSpacerItem, QStatusBar, QTabWidget,
+    QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(546, 620)
+        MainWindow.resize(481, 620)
         MainWindow.setMinimumSize(QSize(420, 620))
         MainWindow.setWindowTitle(u"Videoerfassung f\u00fcr OTC")
         icon = QIcon()
@@ -54,11 +54,17 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.addButton = QPushButton(self.frame_2)
         self.addButton.setObjectName(u"addButton")
-        self.addButton.setText(u"Hinzuf\u00fcgen")
+        self.addButton.setText(u"Video hinzuf\u00fcgen")
 
         self.horizontalLayout_2.addWidget(self.addButton)
 
-        self.horizontalSpacer = QSpacerItem(220, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        self.addCSVButton = QPushButton(self.frame_2)
+        self.addCSVButton.setObjectName(u"addCSVButton")
+        self.addCSVButton.setText(u"CSV hinzuf\u00fcgen")
+
+        self.horizontalLayout_2.addWidget(self.addCSVButton)
+
+        self.horizontalSpacer = QSpacerItem(30, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout_2.addItem(self.horizontalSpacer)
 
@@ -71,7 +77,7 @@ class Ui_MainWindow(object):
 
         self.reloadButton = QPushButton(self.frame_2)
         self.reloadButton.setObjectName(u"reloadButton")
-        self.reloadButton.setText(u"Aktualisieren")
+        self.reloadButton.setText(u"\u00dcbernehmen")
 
         self.horizontalLayout_2.addWidget(self.reloadButton)
 
@@ -104,6 +110,7 @@ class Ui_MainWindow(object):
         self.frame_3.setFrameShape(QFrame.Shape.StyledPanel)
         self.frame_3.setFrameShadow(QFrame.Shadow.Raised)
         self.verticalLayout_3 = QVBoxLayout(self.frame_3)
+        self.verticalLayout_3.setSpacing(6)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
         self.frame_4 = QFrame(self.frame_3)
@@ -115,13 +122,15 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3.setContentsMargins(0, 0, 0, 0)
         self.vidoezeitBox = QCheckBox(self.frame_4)
         self.vidoezeitBox.setObjectName(u"vidoezeitBox")
-        self.vidoezeitBox.setText(u"Vidoes mit Zeitsempel versehen")
+        self.vidoezeitBox.setText(u"einzel Videos mit Zeitsempel versehen")
+        self.vidoezeitBox.setCheckable(False)
 
         self.horizontalLayout_3.addWidget(self.vidoezeitBox)
 
         self.oneVideoBox = QCheckBox(self.frame_4)
         self.oneVideoBox.setObjectName(u"oneVideoBox")
         self.oneVideoBox.setText(u"Ein-Zeitstempel-Video erstellen")
+        self.oneVideoBox.setCheckable(False)
         self.oneVideoBox.setChecked(False)
 
         self.horizontalLayout_3.addWidget(self.oneVideoBox)
@@ -146,17 +155,108 @@ class Ui_MainWindow(object):
         self.detectBox = QCheckBox(self.frame_5)
         self.detectBox.setObjectName(u"detectBox")
         self.detectBox.setText(u"DETECT durchlaufen")
+        self.detectBox.setCheckable(False)
 
         self.horizontalLayout_6.addWidget(self.detectBox)
 
         self.trackBox = QCheckBox(self.frame_5)
         self.trackBox.setObjectName(u"trackBox")
         self.trackBox.setText(u"TRACK durchlaufen")
+        self.trackBox.setCheckable(False)
 
         self.horizontalLayout_6.addWidget(self.trackBox)
 
 
         self.verticalLayout_3.addWidget(self.frame_5)
+
+        self.frame = QFrame(self.frame_3)
+        self.frame.setObjectName(u"frame")
+        self.frame.setFrameShape(QFrame.Shape.StyledPanel)
+        self.frame.setFrameShadow(QFrame.Shadow.Raised)
+        self.horizontalLayout_4 = QHBoxLayout(self.frame)
+        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
+        self.horizontalLayout_4.setContentsMargins(0, 0, 0, 0)
+        self.label = QLabel(self.frame)
+        self.label.setObjectName(u"label")
+        self.label.setMinimumSize(QSize(50, 0))
+        self.label.setMaximumSize(QSize(50, 16777215))
+        self.label.setText(u"Modell")
+        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.horizontalLayout_4.addWidget(self.label)
+
+        self.modellBox = QComboBox(self.frame)
+        self.modellBox.setObjectName(u"modellBox")
+        self.modellBox.setEnabled(False)
+        self.modellBox.setMinimumSize(QSize(75, 0))
+        self.modellBox.setMaximumSize(QSize(16777215, 16777215))
+        self.modellBox.setEditable(False)
+
+        self.horizontalLayout_4.addWidget(self.modellBox)
+
+        self.line = QFrame(self.frame)
+        self.line.setObjectName(u"line")
+        self.line.setMinimumSize(QSize(5, 0))
+        self.line.setFrameShape(QFrame.Shape.VLine)
+        self.line.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.horizontalLayout_4.addWidget(self.line)
+
+        self.label_2 = QLabel(self.frame)
+        self.label_2.setObjectName(u"label_2")
+        self.label_2.setMinimumSize(QSize(50, 0))
+        self.label_2.setMaximumSize(QSize(50, 16777215))
+        self.label_2.setText(u"conf")
+        self.label_2.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.horizontalLayout_4.addWidget(self.label_2)
+
+        self.confSpinBox = QDoubleSpinBox(self.frame)
+        self.confSpinBox.setObjectName(u"confSpinBox")
+        self.confSpinBox.setEnabled(True)
+        self.confSpinBox.setMaximumSize(QSize(60, 16777215))
+        self.confSpinBox.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.confSpinBox.setReadOnly(True)
+        self.confSpinBox.setMaximum(1.000000000000000)
+        self.confSpinBox.setSingleStep(0.010000000000000)
+        self.confSpinBox.setValue(0.250000000000000)
+
+        self.horizontalLayout_4.addWidget(self.confSpinBox)
+
+        self.line_3 = QFrame(self.frame)
+        self.line_3.setObjectName(u"line_3")
+        self.line_3.setFrameShape(QFrame.Shape.VLine)
+        self.line_3.setFrameShadow(QFrame.Shadow.Sunken)
+
+        self.horizontalLayout_4.addWidget(self.line_3)
+
+        self.label_3 = QLabel(self.frame)
+        self.label_3.setObjectName(u"label_3")
+        self.label_3.setMinimumSize(QSize(50, 0))
+        self.label_3.setMaximumSize(QSize(50, 16777215))
+        self.label_3.setText(u"iou")
+        self.label_3.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.horizontalLayout_4.addWidget(self.label_3)
+
+        self.iouSpinBox = QDoubleSpinBox(self.frame)
+        self.iouSpinBox.setObjectName(u"iouSpinBox")
+        self.iouSpinBox.setEnabled(True)
+        self.iouSpinBox.setMaximumSize(QSize(60, 16777215))
+        self.iouSpinBox.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.iouSpinBox.setReadOnly(True)
+        self.iouSpinBox.setMaximum(1.000000000000000)
+        self.iouSpinBox.setSingleStep(0.010000000000000)
+        self.iouSpinBox.setValue(0.450000000000000)
+
+        self.horizontalLayout_4.addWidget(self.iouSpinBox)
+
+        self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+
+        self.horizontalLayout_4.addItem(self.horizontalSpacer_2)
+
+
+        self.verticalLayout_3.addWidget(self.frame)
 
         self.line_2 = QFrame(self.frame_3)
         self.line_2.setObjectName(u"line_2")
@@ -175,12 +275,14 @@ class Ui_MainWindow(object):
         self.rErgBox = QCheckBox(self.frame_6)
         self.rErgBox.setObjectName(u"rErgBox")
         self.rErgBox.setText(u"R Ergebnisdarstellung erzeugen")
+        self.rErgBox.setCheckable(False)
 
         self.horizontalLayout_7.addWidget(self.rErgBox)
 
         self.excelBox = QCheckBox(self.frame_6)
         self.excelBox.setObjectName(u"excelBox")
         self.excelBox.setText(u"Excel Ergebnistabelle erstellen")
+        self.excelBox.setCheckable(False)
 
         self.horizontalLayout_7.addWidget(self.excelBox)
 
@@ -198,13 +300,24 @@ class Ui_MainWindow(object):
         self.horizontalLayout.setSpacing(0)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
-        self.horizontalSpacer_3 = QSpacerItem(446, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        self.resetButton = QPushButton(self.frame_7)
+        self.resetButton.setObjectName(u"resetButton")
+        font = QFont()
+        font.setItalic(True)
+        self.resetButton.setFont(font)
+        self.resetButton.setAutoFillBackground(False)
+        self.resetButton.setText(u"Reset")
+
+        self.horizontalLayout.addWidget(self.resetButton)
+
+        self.horizontalSpacer_3 = QSpacerItem(306, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
 
         self.horizontalLayout.addItem(self.horizontalSpacer_3)
 
         self.startButton = QPushButton(self.frame_7)
         self.startButton.setObjectName(u"startButton")
         self.startButton.setText(u"Start")
+        self.startButton.setCheckable(False)
 
         self.horizontalLayout.addWidget(self.startButton)
 
@@ -213,7 +326,8 @@ class Ui_MainWindow(object):
 
         self.progressBar = QProgressBar(self.frame_1)
         self.progressBar.setObjectName(u"progressBar")
-        self.progressBar.setValue(24)
+        self.progressBar.setValue(0)
+        self.progressBar.setFormat(u"%p%")
 
         self.verticalLayout_2.addWidget(self.progressBar)
 
