@@ -43,7 +43,19 @@ def timeparser(date_string: str, test=False) -> datetime:
         "%Y.%m.%d %H.%M.%S",
         "%Y.%m.%d %H.%M.%S.",
 
-        "%Y-%m-%dT%H:%M:%S",
+        "%Y-%m-%d_%H-%M-%S",
+        "%Y-%m-%d_%H-%M-%S.",
+        "%Y-%m-%d_%H:%M:%S",
+        "%Y-%m-%d_%H:%M:%S.",
+        "%Y-%m-%d_%H.%M.%S",
+        "%Y-%m-%d_%H.%M.%S.",
+        
+        "%Y.%m.%d_%H-%M-%S",
+        "%Y.%m.%d_%H-%M-%S.",
+        "%Y.%m.%d_%H:%M:%S",
+        "%Y.%m.%d_%H:%M:%S.",
+        "%Y.%m.%d_%H.%M.%S",
+        "%Y.%m.%d_%H.%M.%S.",
     ]
     for fmt in formats:
         try:
