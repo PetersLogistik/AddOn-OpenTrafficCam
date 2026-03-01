@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*- 
 import sys
+from verarbeitung import test_excel_ausgabe as ex
 from verarbeitung import opentracffic as ot
 from verarbeitung import analyse_erfassung as ae
 from mainUi_ui import Ui_MainWindow
@@ -57,8 +58,14 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
         """
             Durch den Nutzer gestartet und läd eine Datei.
         """
-        self.aktivCSV()
-        # dateien, _ = QFileDialog.getOpenFileNames(self, "Dateien öffnen", "", "Alle Dateien (*);;Python-Dateien (*.py)")
+        dateien, _ = QFileDialog.getOpenFileNames(self, "Dateien öffnen", "", "CSV-Datei (*.csv);;Alle Dateien (*);")
+        if dateien:
+            print(dateien)
+            for datei in dateien:
+                self.mainpfad.append({"pfad":datei})
+            self.aktivCSV()
+            self.cvsTabelle()
+
 
     def bestaetigen(self) -> None:
         """
@@ -103,11 +110,11 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
         if self.oneVideoBox.isChecked():
             ae.make_onevideo(df_video)
             self.infobox("Es wurde ein durchgehendes Video mit Zeitstempel erstellt.")
-            # QMessageBox.information(self, "Hinweis", f"Es wurde ein durchgehendes Video mit Zeitstempel erstellt.", QMessageBox.Ok, QMessageBox.Ok)
+        
         if self.vidoezeitBox.isChecked():
             ae.videozeit_in_video(df_video)
             self.infobox("Alle Viedeos wurden mit einem Zeitstempel versehen.")
-            # QMessageBox.information(self, "Hinweis", f"Alle Viedeos wurden mit einem Zeitstempel versehen.", QMessageBox.Ok, QMessageBox.Ok)
+        
         if self.detectBox.isChecked() or self.trackBox.isChecked():
             for mpfad in self.mainpfad:
                 directory = mpfad["pfad"]
@@ -117,18 +124,24 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
                 modell = self.modellBox.currentText()
                 conf_value = self.confSpinBox.value()
                 iou_value = self.iouSpinBox.value()
-                ot.start_otc(detect, directory, durination, modell, conf_value, iou_value, track)
+                ot.start_otvision(detect, directory, durination, modell, conf_value, iou_value, track)
+            QMessageBox.information(self, "Hinweis", f"Die Analyse der Videos ist abgeschlossen.", QMessageBox.Ok, QMessageBox.Ok)
 
         # if self.rErgBox.isChecked():
         #     pass
+
         # if self.excelBox.isChecked():
-        #     pass
+        #     fs = [r".\2026-02-01_13-17-45.counts_15min.csv",
+        #         ]
+        #     d = ex.connect(fs)
+        #     f = ex.convert(d, fs[0])
+        #     ex.firstpage(f)
+
         self.aktivVideo()
         self.bereit()
 
     def start_ota(self):
-        # ot.start_otanalytics()
-        ot.short_ota()
+        ot.start_otanalytics()
 
     """
         Ausführungen 
@@ -148,6 +161,9 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
         else:
             self.tabelle_fuellen(df_videos)
         self.bereit()
+
+    def cvsTabelle(self) -> None:
+        pass
 
     def tabelle_fuellen(self, df:dict) -> None:
         """

@@ -4,7 +4,7 @@ import subprocess
 import platform
 from pathlib import Path
 
-def start_otc(detect:bool, directory:str, durination:int, modell:str, conf_value:float, iou_value:float, track:bool):
+def start_otvision(detect:bool, directory:str, durination:int, modell:str, conf_value:float, iou_value:float, track:bool):
     # OT_PATH aus Umgebungsvariable holen
     ot_path = os.getenv("OT_PATH")
     if not ot_path:
@@ -44,19 +44,25 @@ def start_otc(detect:bool, directory:str, durination:int, modell:str, conf_value
                 "--iou", str(iou_value) 
             ]
 
-        subprocess.run(command, shell=True, text=True)
+        stdout, stderr, returncode = subprocess.run(command, shell=True, text=True)
+        print(stdout)
+        print(stderr)
+        print(returncode)
         # subprocess.Popen( ["cmd", "/k", str(command)], cwd=python_executable, creationflags=subprocess.CREATE_NEW_CONSOLE )
 
     if track:
         command = f'python track.py -p "{directory}"'
-        subprocess.run(command, shell=True, text=True)
+        stdout, stderr, returncode = subprocess.run(command, shell=True, text=True)
+        print(stdout)
+        print(stderr)
+        print(returncode)
         # subprocess.Popen(
         #     ["cmd", "/k", str(command)],
         #     # cwd=python_executable,
         #     creationflags=subprocess.CREATE_NEW_CONSOLE
         # )
 
-def short_ota():
+def start_otanalytics():
     # Absoluter Pfad zum aktuellen Python-Skript
     script_dir = Path(__file__).parent
 
@@ -70,6 +76,4 @@ def short_ota():
     )
     
 if __name__ == "__main__":
-    pfad = r"D:\Erhebungen\2026-02 Düsseldorf Rheinbahn\cam1"
-    duri = 900
-    start_otc(True, pfad, duri, "yolo11m", 0.25, 0.45 , True)
+    pass

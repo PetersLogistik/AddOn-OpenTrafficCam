@@ -1,5 +1,6 @@
 # Zusatz
 __bsp__/
+test*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
