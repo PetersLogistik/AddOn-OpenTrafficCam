@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*- 
-import sys, os, time
-from verarbeitung import video_verarbeitung as vid
+import sys
 from verarbeitung import opentracffic as ot
 from verarbeitung import analyse_erfassung as ae
 from mainUi_ui import Ui_MainWindow
@@ -16,6 +15,7 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
         self.addButton.clicked.connect(self.ordnerEingabe)
         self.addCSVButton.clicked.connect(self.csvEingabe)
         self.reloadButton.clicked.connect(self.bestaetigen)
+        self.otanalyticsButton.clicked.connect(self.start_ota)
         self.resetButton.clicked.connect(self.resetGui)
         self.startButton.clicked.connect(self.get_input)
 
@@ -122,19 +122,11 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
         #     pass
         # if self.excelBox.isChecked():
         #     pass
-        self.enableAll()
+        self.aktivVideo()
         self.bereit()
 
-    def infobox(self, text:str) -> None:
-        msg = QMessageBox()
-        msg.setIcon(QMessageBox.Icon.Information)
-        msg.setText(text)
-        msg.setWindowTitle("Auto-Closing Info")
-        msg.setStandardButtons(QMessageBox.StandardButton.Ok)
-    
-        # Close after 5 seconds
-        QTimer.singleShot(10000, lambda: msg.done(0))
-        msg.exec()
+    def start_ota(self):
+        ot.start_otanalytics()
 
     """
         Ausführungen 
@@ -190,7 +182,7 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
                 self.tabelle_fuellen(df_video)
 
         self.bereit()
-        self.enableAll()
+        self.aktivVideo()
             
     def makeCSV(self):
         """
@@ -207,11 +199,53 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
         Gui - Anpassungen
     """
     def load_standard(self):
+        """
+            # Setzt alle Elemente auf die Ausgangslage
+        """
+        # Werte laden
         value = ae.get_standard_values()
+        # Standartwerte
+        self.tableStatus = None
+        self.mainpfad = [] 
+        # setzte & füllen
+        self.addButton.setDisabled(False)
+        self.addCSVButton.setDisabled(False)
+        self.renameBox.setDisabled(False)
+        self.renameBox.setChecked(True)
+        self.reloadButton.setDisabled(True)
+        self.tableWidget.setDisabled(False)
+        self.loeche_Zeileneintaege()
+        self.tableWidget.setColumnCount(0)
+        self.vidoezeitBox.setDisabled(False)
+        self.vidoezeitBox.setCheckable(False)
+        self.vidoezeitBox.setChecked(False)
+        self.oneVideoBox.setDisabled(False)
+        self.oneVideoBox.setCheckable(False)
+        self.oneVideoBox.setChecked(False)
+        self.trackBox.setDisabled(False)
+        self.trackBox.setCheckable(False)
+        self.trackBox.setChecked(False)
+        self.detectBox.setDisabled(False)
+        self.detectBox.setCheckable(False)
+        self.detectBox.setChecked(False)
+        self.otanalyticsButton.setDisabled(True)
+        self.modellBox.setDisabled(True)
+        self.modellBox.clear()
         self.modellBox.addItems(value["modells"])
         self.modellBox.setCurrentIndex(value["modell_standard"])
+        self.confSpinBox.setDisabled(False)
+        self.confSpinBox.setReadOnly(True)
         self.confSpinBox.setValue(value["conf_value"])
+        self.iouSpinBox.setDisabled(False)
+        self.iouSpinBox.setReadOnly(True)
         self.iouSpinBox.setValue(value["iou_value"])
+        self.rErgBox.setDisabled(False)
+        self.rErgBox.setCheckable(False)
+        self.rErgBox.setChecked(False)
+        self.excelBox.setDisabled(False)
+        self.excelBox.setCheckable(False)
+        self.excelBox.setChecked(False)
+        self.startButton.setDisabled(False)
 
     def reset_button(self) -> None:
         # Button zurücksetzen
@@ -232,6 +266,7 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
         self.oneVideoBox.setDisabled(True)
         self.trackBox.setDisabled(True)
         self.detectBox.setDisabled(True)
+        self.otanalyticsButton.setDisabled(True)
         self.modellBox.setDisabled(True)
         self.confSpinBox.setDisabled(True)
         self.iouSpinBox.setDisabled(True)
@@ -239,53 +274,11 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
         self.excelBox.setDisabled(True)
         self.startButton.setDisabled(True)
 
-    def enableAll(self) -> None:
-        """
-            Entsperrt alle Klick-Elemente 
-        """
-        self.addButton.setDisabled(False)
-        self.addCSVButton.setDisabled(False)
-        self.renameBox.setDisabled(False)
-        self.reloadButton.setDisabled(False)
-        self.tableWidget.setDisabled(False)
-        self.vidoezeitBox.setDisabled(False)
-        self.oneVideoBox.setDisabled(False)
-        self.trackBox.setDisabled(False)
-        self.detectBox.setDisabled(False)
-        self.modellBox.setDisabled(False)
-        self.confSpinBox.setDisabled(False)
-        self.iouSpinBox.setDisabled(False)
-        self.rErgBox.setDisabled(False)
-        self.excelBox.setDisabled(False)
-        self.startButton.setDisabled(False)
-
     def resetGui(self) -> None:
         if self.reset_aktiv:
             self.reset_button()
-            self.enableAll()
-            # Checked
-            self.renameBox.setChecked(True)
-            # Non-Checked
-            self.trackBox.setChecked(False)
-            self.detectBox.setChecked(False)
-            # Disable
-            self.reloadButton.setEnabled(False)
-            self.rErgBox.setCheckable(False)
-            self.excelBox.setCheckable(False)
-            self.vidoezeitBox.setCheckable(False)
-            self.oneVideoBox.setCheckable(False)
-            self.trackBox.setCheckable(False)
-            self.detectBox.setCheckable(False)
-            self.loeche_Zeileneintaege()
-            self.tableWidget.setColumnCount(0)
-            self.modellBox.setEnabled(False)
-            self.modellBox.clear()
-            self.confSpinBox.setReadOnly(True)
-            self.iouSpinBox.setReadOnly(True)
-            # Standartwerte
             self.load_standard()
-            self.tableStatus = None
-            self.mainpfad = []
+
         else:
             self.reset_aktiv = True
             self.resetButton.setStyleSheet("background-color: red;")
@@ -302,6 +295,7 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
         self.oneVideoBox.setCheckable(True)
         self.trackBox.setCheckable(True)
         self.detectBox.setCheckable(True)
+        self.otanalyticsButton.setDisabled(False)
         self.modellBox.setEnabled(True)
         self.confSpinBox.setReadOnly(False)
         self.iouSpinBox.setReadOnly(False)
@@ -400,7 +394,20 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
         menu.addAction("Zeile löschen", self.delete_selected_row)
         
         menu.exec(self.tableWidget.viewport().mapToGlobal(position))
-
+    
+    """
+    Weitere Abfragen/Anzeigen
+    """
+    def infobox(self, text:str) -> None:
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Icon.Information)
+        msg.setText(text)
+        msg.setWindowTitle("Auto-Closing Info")
+        msg.setStandardButtons(QMessageBox.StandardButton.Ok)
+    
+        # Close after 5 seconds
+        QTimer.singleShot(10000, lambda: msg.done(0))
+        msg.exec()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

@@ -156,6 +156,13 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_6.addWidget(self.trackBox)
 
+        self.otanalyticsButton = QPushButton(self.frame_5)
+        self.otanalyticsButton.setObjectName(u"otanalyticsButton")
+        self.otanalyticsButton.setEnabled(False)
+        self.otanalyticsButton.setText(u"OTAnalytics")
+
+        self.horizontalLayout_6.addWidget(self.otanalyticsButton)
+
 
         self.verticalLayout_3.addWidget(self.frame_5)
 

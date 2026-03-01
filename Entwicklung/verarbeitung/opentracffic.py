@@ -57,3 +57,25 @@ def start_track(directory:str) -> None:
     """
     command = f'python track.py -p "{directory}"'
     return command
+
+def start_otanalytics():
+    """
+    
+    """
+    command = [
+        'set PATH_TO_OT=%OT_PATH%',
+        'setlocal',
+        'cd "%PATH_TO_OT%\OTAnalytics"',
+        'if not exist "%PATH_TO_OT%\OTAnalytics" ( echo Verzeichnis "%PATH_TO_OT%\OTAnalytics" wurde nicht gefunden. exit /b )',
+        'start_gui.cmd',
+        'exit'
+    ]
+
+    try:
+        result = subprocess.run(command, shell=True, text=True)
+    except Exception as e:
+        print(f"Ein Fehler (File) ist aufgetreten: {e}")
+    else:
+        print(result.stdout)
+        print(result.stderr)
+        print(result.returncode) 
