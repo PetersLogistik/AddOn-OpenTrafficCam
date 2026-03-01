@@ -2,7 +2,7 @@
 from .analyse_erfassung import (get_standard_values, dateien_laden, convert_to_pandas, 
                                 test_zeiteingabe, zeiten_anpassen, dateiname_anpassen, make_onevideo,
                                 videozeit_in_video)
-from .opentracffic import (start_detect, start_track)
+from .opentracffic import (start_otc, short_ota)
 from .video_verarbeitung import (extrahiere_datum, timeparser, get_next_starttime, 
                                  get_video_len_ffprobe, datei_name_anpassen, dateipfad_anpassen, 
                                  make_video_overlay, one_video)

@@ -1,81 +1,75 @@
 # -*- coding: utf-8 -*-
+import os, sys
 import subprocess
+import platform
+from pathlib import Path
 
-def start_otc(detect:bool, directory:str, durination:str, modell:str, conf_value:str, iou_value:str, track:bool) -> None:
-    """
+def start_otc(detect:bool, directory:str, durination:int, modell:str, conf_value:float, iou_value:float, track:bool):
+    # OT_PATH aus Umgebungsvariable holen
+    ot_path = os.getenv("OT_PATH")
+    if not ot_path:
+        sys.exit(1)
+
+    ot_vision_path = Path(ot_path) / "OTVision"
+
+    # Prüfen ob Verzeichnis existiert
+    if not ot_vision_path.exists():
+        sys.exit(1)
+
+    os.chdir(ot_vision_path)
+
+    # Prüfen ob virtuelles Environment existiert
+    python_executable = ot_vision_path / ".venv" / "Scripts" / "python.exe"
+    if not python_executable.exists():
+        sys.exit(1)
+
+    if detect:
+        if durination > 0: # Ohne Zeitangabe
+            command = [
+                str(python_executable),
+                "detect.py",
+                "-p", str(directory),
+                "-w", f"{modell}.pt",
+                "--conf", str(conf_value),
+                "--iou", str(iou_value)
+            ]
+        else: # Mit Zeitangabe
+            command = [
+                str(python_executable),
+                "detect.py",
+                "-p", str(directory),
+                "--expected-duration", str(durination),
+                "-w", f"{modell}.pt",
+                "--conf", str(conf_value),
+                "--iou", str(iou_value) 
+            ]
+
+        subprocess.run(command, shell=True, text=True)
+        # subprocess.Popen( ["cmd", "/k", str(command)], cwd=python_executable, creationflags=subprocess.CREATE_NEW_CONSOLE )
+
+    if track:
+        command = f'python track.py -p "{directory}"'
+        subprocess.run(command, shell=True, text=True)
+        # subprocess.Popen(
+        #     ["cmd", "/k", str(command)],
+        #     # cwd=python_executable,
+        #     creationflags=subprocess.CREATE_NEW_CONSOLE
+        # )
+
+def short_ota():
+    # Absoluter Pfad zum aktuellen Python-Skript
+    script_dir = Path(__file__).parent
+
+    # Pfad zur CMD-Datei relativ zum Skript
+    cmd_file = script_dir / "startOTAnalytics.cmd"
+
+    # Neue Konsole starten
+    subprocess.Popen(
+        ["cmd", "/k", str(cmd_file)],  # /k = Konsole bleibt offen
+        creationflags=subprocess.CREATE_NEW_CONSOLE
+    )
     
-    """
-    command = [
-        "set PATH_TO_OT=%OT_PATH%",
-        "setlocal",
-        'cd "%PATH_TO_OT%\OTVision"',
-        "echo start OTVision",
-        "call .venv\Scripts\activate",
-        "deactivate",
-        "endlocal",
-        "exit"
-    ]
-
-    if detect is True:
-        commandline = start_detect(directory, durination, modell, conf_value, iou_value)
-        command.insert(6, commandline)
-
-    if track is True:
-        commandline = start_track(directory)
-        i = 6
-        if detect:
-            i += 1
-        command.insert(i, commandline)
-
-    try:
-        result = subprocess.run(command, shell=True, text=True)
-    except Exception as e:
-        print(f"Ein Fehler (File) ist aufgetreten: {e}")
-    else:
-        print(result.stdout)
-        print(result.stderr)
-        print(result.returncode) 
-    
-def start_detect(directory:str, durination:int, modell:str, conf_value:float, iou_value:float) -> None:
-    """
-        Hierdurch wird Detect gestartet.
-        # Standard:  YOLOv8s, Konfidenzschwelle 0.25, IoU-Schwelle 0.45
-        # version 2: YOLOv8m, Konfidenzschwelle 0.1, IoU-Schwelle 0.6
-        # version 3: YOLOv11m, Konfidenzschwelle 0.1, IoU-Schwelle 0.6
-    """
-    if durination > 0:
-        command = f'python detect.py -p "{directory}" --expected-duration "{durination}" -w {modell}.pt --conf {conf_value} --iou {iou_value}' 
-    else:
-        command = f'python detect.py -p "{directory}" -w {modell}.pt --conf {conf_value} --iou {iou_value}'
-    
-    return command
-
-
-def start_track(directory:str) -> None:
-    """
-        Hierdurch wird Track gestartet.
-    """
-    command = f'python track.py -p "{directory}"'
-    return command
-
-def start_otanalytics():
-    """
-    
-    """
-    command = [
-        'set PATH_TO_OT=%OT_PATH%',
-        'setlocal',
-        'cd "%PATH_TO_OT%\OTAnalytics"',
-        'if not exist "%PATH_TO_OT%\OTAnalytics" ( echo Verzeichnis "%PATH_TO_OT%\OTAnalytics" wurde nicht gefunden. exit /b )',
-        'start_gui.cmd',
-        'exit'
-    ]
-
-    try:
-        result = subprocess.run(command, shell=True, text=True)
-    except Exception as e:
-        print(f"Ein Fehler (File) ist aufgetreten: {e}")
-    else:
-        print(result.stdout)
-        print(result.stderr)
-        print(result.returncode) 
+if __name__ == "__main__":
+    pfad = r"D:\Erhebungen\2026-02 Düsseldorf Rheinbahn\cam1"
+    duri = 900
+    start_otc(True, pfad, duri, "yolo11m", 0.25, 0.45 , True)

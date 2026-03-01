@@ -32,6 +32,7 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
         # Standart-Werte laden
         self.tableStatus = None
         self.load_standard()
+        # self.otanalyticsButton.setEnabled(True)
 
         # Staus anzeigen
         self.statusBar().showMessage("Bereit")
@@ -126,7 +127,8 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
         self.bereit()
 
     def start_ota(self):
-        ot.start_otanalytics()
+        # ot.start_otanalytics()
+        ot.short_ota()
 
     """
         Ausführungen 

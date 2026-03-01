@@ -51,9 +51,9 @@ def convert_to_pandas(daten:list, names:list) -> object:
     for idx, row in df.iterrows(): # Fügt alles in ein Zeitformat
         error, datum_uhrzeit = timeparser(row["zeit"],"str")
         if error:
-            df.loc[idx]["zeit"] = None
+            df.loc[idx, "zeit"] = None
         else:
-            df.loc[idx]["zeit"] = datum_uhrzeit
+            df.loc[idx, "zeit"] = datum_uhrzeit
 
     return df
 
@@ -76,7 +76,7 @@ def zeiten_anpassen(df_video: pd.DataFrame, mainpfad: list[dict]) -> pd.DataFram
     """
     groups = df_video.groupby("basispfad")
     for idx, liste in enumerate(mainpfad,1):
-        df_guppe = groups.get_group(f"{liste['pfad']}")
+        df_guppe = groups.get_group(f"{liste['pfad']}").copy()
         for i in range(df_guppe.index.min(), df_guppe.index.max()):
             startzeit = df_guppe.loc[i,"zeit"]
             video_pfad = df_guppe.loc[i,"dateipfad"]
@@ -121,8 +121,12 @@ def get_durination(directory):
             # Videozeit addieren
             v_len += get_video_len_ffprobe(file_path)
             anz += 1
-
-    return round(v_len / anz, 0).as_integer_ratio()[0]
+    try:
+        duration = round(v_len / anz, 0).as_integer_ratio()[0]
+    except:
+        duration = -1
+    print(f"Durchschnittlich ist ein Video {duration} lang.")
+    return duration
 
 if __name__ == "__main__":
     # print(dateien_laden(r"J:\Düsseldorf 01.07.2025 und 03.07.2025\03.07.2025\cam3\7-10.15uhr\354GOPRO"))
