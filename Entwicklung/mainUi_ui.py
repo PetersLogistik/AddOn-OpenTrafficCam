@@ -29,7 +29,7 @@ class Ui_MainWindow(object):
         MainWindow.setMinimumSize(QSize(420, 620))
         MainWindow.setWindowTitle(u"Videoerfassung f\u00fcr OTC")
         icon = QIcon()
-        icon.addFile(u"bueffee_mailfuss.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        icon.addFile(u"bueffee_steben.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         MainWindow.setWindowIcon(icon)
         MainWindow.setWindowFilePath(u"")
         MainWindow.setTabShape(QTabWidget.TabShape.Rounded)
@@ -77,6 +77,7 @@ class Ui_MainWindow(object):
 
         self.reloadButton = QPushButton(self.frame_2)
         self.reloadButton.setObjectName(u"reloadButton")
+        self.reloadButton.setEnabled(False)
         self.reloadButton.setText(u"\u00dcbernehmen")
 
         self.horizontalLayout_2.addWidget(self.reloadButton)
@@ -85,17 +86,6 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.addWidget(self.frame_2)
 
         self.tableWidget = QTableWidget(self.frame_1)
-        if (self.tableWidget.columnCount() < 3):
-            self.tableWidget.setColumnCount(3)
-        __qtablewidgetitem = QTableWidgetItem()
-        __qtablewidgetitem.setText(u"Zeit");
-        self.tableWidget.setHorizontalHeaderItem(0, __qtablewidgetitem)
-        __qtablewidgetitem1 = QTableWidgetItem()
-        __qtablewidgetitem1.setText(u"Dateiname");
-        self.tableWidget.setHorizontalHeaderItem(1, __qtablewidgetitem1)
-        __qtablewidgetitem2 = QTableWidgetItem()
-        __qtablewidgetitem2.setText(u"Pfad");
-        self.tableWidget.setHorizontalHeaderItem(2, __qtablewidgetitem2)
         self.tableWidget.setObjectName(u"tableWidget")
         self.tableWidget.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
         self.tableWidget.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
@@ -214,12 +204,13 @@ class Ui_MainWindow(object):
         self.confSpinBox = QDoubleSpinBox(self.frame)
         self.confSpinBox.setObjectName(u"confSpinBox")
         self.confSpinBox.setEnabled(True)
-        self.confSpinBox.setMaximumSize(QSize(60, 16777215))
+        self.confSpinBox.setMinimumSize(QSize(50, 0))
+        self.confSpinBox.setMaximumSize(QSize(70, 16777215))
         self.confSpinBox.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.confSpinBox.setReadOnly(True)
         self.confSpinBox.setMaximum(1.000000000000000)
         self.confSpinBox.setSingleStep(0.010000000000000)
-        self.confSpinBox.setValue(0.250000000000000)
+        self.confSpinBox.setValue(0.000000000000000)
 
         self.horizontalLayout_4.addWidget(self.confSpinBox)
 
@@ -242,12 +233,13 @@ class Ui_MainWindow(object):
         self.iouSpinBox = QDoubleSpinBox(self.frame)
         self.iouSpinBox.setObjectName(u"iouSpinBox")
         self.iouSpinBox.setEnabled(True)
-        self.iouSpinBox.setMaximumSize(QSize(60, 16777215))
+        self.iouSpinBox.setMinimumSize(QSize(50, 0))
+        self.iouSpinBox.setMaximumSize(QSize(70, 16777215))
         self.iouSpinBox.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.iouSpinBox.setReadOnly(True)
         self.iouSpinBox.setMaximum(1.000000000000000)
         self.iouSpinBox.setSingleStep(0.010000000000000)
-        self.iouSpinBox.setValue(0.450000000000000)
+        self.iouSpinBox.setValue(0.000000000000000)
 
         self.horizontalLayout_4.addWidget(self.iouSpinBox)
 

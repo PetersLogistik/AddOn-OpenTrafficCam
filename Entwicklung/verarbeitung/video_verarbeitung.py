@@ -22,7 +22,7 @@ def extrahiere_datum(dateiname):
         except:
             return "YYYY-mm-dd HH-MM-SS"
 
-def timeparser(date_string: str, test=False) -> datetime:
+def timeparser(date_string: str, returns="timestamp") -> datetime:
     """
     Versucht, das Datum mit jedem Format aus der Liste zu parsen.
     Gibt das erste erfolgreiche datetime‑Objekt zurück.
@@ -57,23 +57,28 @@ def timeparser(date_string: str, test=False) -> datetime:
         "%Y.%m.%d_%H.%M.%S",
         "%Y.%m.%d_%H.%M.%S.",
     ]
+
     for fmt in formats:
         try:
+            if date_string is None:
+                break
             datum_uhrzeit = datetime.strptime(date_string, fmt)
-            if test:
-                return True, datum_uhrzeit.strftime('%Y-%m-%d %H-%M-%S')
-            return datum_uhrzeit
         except ValueError:
             continue
-
+        else:
+            if returns == "timestamp":
+                return False, datum_uhrzeit
+            elif returns == "str":
+                return False, datum_uhrzeit.strftime('%Y-%m-%d %H-%M-%S')
+        
     # Kein Format hat funktioniert
-    raise ValueError(f"Keines der angegebenen Formate hat '{date_string}' erkannt.")
-    
+    return True, date_string
+
 def get_next_starttime(start_zeit, video_pfad) -> str:
     """
         Gibt die neue Startzeit für das folgende Video zurück.
     """
-    begin_zeit = timeparser(start_zeit)
+    _, begin_zeit= timeparser(start_zeit)
     video_len = get_video_len_ffprobe(video_pfad)
     begin_zeit += timedelta(seconds=video_len)
 
@@ -94,8 +99,8 @@ def get_video_len_ffprobe(video_path):
     info = json.loads(result.stdout)
     return float(info['format']['duration'])        
 
-def datei_name_anpassen(file_path, zeitstempel, pre="") -> str:
-    datum_uhrzeit = timeparser(zeitstempel)
+def datei_name_anpassen(file_path:str, zeitstempel:str, pre="") -> str:
+    _, datum_uhrzeit = timeparser(zeitstempel)
     
     path, _ = os.path.splitext(file_path)
     file = path.split('\\')[-1]
@@ -105,7 +110,7 @@ def datei_name_anpassen(file_path, zeitstempel, pre="") -> str:
     newfilename = path + pre + file + f"_{datum_uhrzeit.strftime('%Y-%m-%d_%H-%M-%S')}.mp4"
     return newfilename
 
-def rename_Datei(file_path, zeitstempel) -> None:
+def dateipfad_anpassen(file_path:str, zeitstempel:str) -> None:
     """
         Einfache Umbenennung im gegebenen Ordner
     """
@@ -126,33 +131,36 @@ def make_video_overlay(input_path:str, startzeit:str) -> None:
     Der Inputpath darf dem Outputpath nicht gleichen.
     Zeit muss als string eingegeben werden.
     """
-    time = timeparser(startzeit).timestamp()
+    _, timestp = timeparser(startzeit, "timestamp")
 
     # ffmpeg -i input.mp4 -vf drawtext="fontfile=C\\:/Windows/Fonts/arial.ttf:text=%{pts\\:gmtime\\:1754565600}:x=10:y=10:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.5" -codec:a copy output.mp4
     font_path = "C\\:/Windows/Fonts/arial.ttf"
 
     drawtext_filter = (
         f'drawtext=fontfile=\'{font_path}\':'
-        f"text=\'%{{pts\\:localtime\\:{time}}}\':"
+        f"text=\'%{{pts\\:localtime\\:{timestp.timestamp()}}}\':"
         'x=10:y=10:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.5'
     )
     output_path = input_path.strip('.mp4')+'_timestamp.mp4'
     command = f'ffmpeg -y -i "{input_path}" -vf {drawtext_filter} -preset ultrafast -f mp4 -codec:a copy "{output_path}"'
 
     # Führe den Befehl aus
-    process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=False)
-    # process = subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_CONSOLE, )
-    # process.wait()
+    # process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=False)
+    process = subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_CONSOLE, )
+    process.wait()
 
     if os.path.exists(input_path): # Entfernt die Datei, wenn sie vorhanden ist.
-        os.remove(input_path)
+        try:
+            os.remove(input_path)
+        except PermissionError as e:
+            print(e)
 
 def one_video(directory:str, time:str) -> object:
     """
         Erstellt eine .txt über alle Videos in einem Ordner && erstellt ein einzelnes Video aus den Splitern.
     """
     extensions = [".mp4", ".MP4", ".avi",".mkv",".mov"]
-    datum_uhrzeit = timeparser(time)
+    _, datum_uhrzeit = timeparser(time)
     file_output = os.path.abspath(os.path.join(directory, f"fullvideo_{datum_uhrzeit.strftime('%Y-%m-%d_%H-%M-%S')}.mp4"))
 
     files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
@@ -174,9 +182,12 @@ def one_video(directory:str, time:str) -> object:
     process.wait()
 
     if os.path.exists(file_zsm): # Entfernt die Datei, wenn sie vorhanden ist.
-        os.remove(file_zsm)
+        try:
+            os.remove(file_zsm)
+        except PermissionError as e:
+            print(e)
     
-    return file_output, datum_uhrzeit.strftime('%Y-%m-%d_%H-%M-%S')
+    make_video_overlay(file_output, datum_uhrzeit.strftime('%Y-%m-%d_%H-%M-%S'))
 
 if __name__ == '__main__':
      pass

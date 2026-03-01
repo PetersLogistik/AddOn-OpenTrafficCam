@@ -1,0 +1,7 @@
+modells: ["yolo11m", "yolov8m", "yolov8s"]
+modell_standard: 0
+conf_value: 0.25
+iou_value: 0.45
+videotabelle: ["Zeit", "Dateiname", "Dateipfad", "Basispfad"]
+csvtabelle: ["Dateiname", "Dateipfad"]
+video_extensions: [".mp4", ".MP4", ".avi",".mkv",".mov"]
