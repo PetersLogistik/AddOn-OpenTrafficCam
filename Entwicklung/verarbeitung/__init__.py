@@ -6,7 +6,7 @@ from .opentracffic import start_otc, short_ota
 from .video_verarbeitung import (extrahiere_datum, timeparser, get_next_starttime, 
                                  get_video_len_ffprobe, datei_name_anpassen, dateipfad_anpassen, 
                                  make_video_overlay, one_video)
-from .test_excel_ausgabe import connect, convert, firstpage
+from .excel_ausgabe import connect, convert, firstpage
 ## Define package-level variables
 __version__ = "0.1.0"
 __author__ = "Patrick Peters"

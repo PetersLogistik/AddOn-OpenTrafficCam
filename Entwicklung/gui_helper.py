@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*- 
 import sys
-from verarbeitung import test_excel_ausgabe as ex
+from verarbeitung import excel_ausgabe as ex
 from verarbeitung import opentracffic as ot
 from verarbeitung import analyse_erfassung as ae
 from mainUi_ui import Ui_MainWindow
@@ -130,12 +130,12 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
         # if self.rErgBox.isChecked():
         #     pass
 
-        # if self.excelBox.isChecked():
-        #     fs = [r".\2026-02-01_13-17-45.counts_15min.csv",
-        #         ]
-        #     d = ex.connect(fs)
-        #     f = ex.convert(d, fs[0])
-        #     ex.firstpage(f)
+        if self.excelBox.isChecked():
+            fs = [r".\2026-02-01_13-17-45.counts_15min.csv",
+                ]
+            d = ex.connect(fs)
+            f = ex.convert(d, fs[0])
+            ex.firstpage(f)
 
         self.aktivVideo()
         self.bereit()
