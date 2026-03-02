@@ -2,7 +2,7 @@
 import os
 import yaml
 import pandas as pd
-from .video_verarbeitung import extrahiere_datum, timeparser, get_next_starttime, dateipfad_anpassen, one_video, make_video_overlay, get_video_len_ffprobe
+from .video_verarbeitung import extrahiere_datum, timeparser, get_next_starttime, dateipfad_anpassen, one_video, make_video_overlay, get_video_len_ffprobe, dateparser
 
 def get_standard_values(value:str=None) -> object:
     """
@@ -17,7 +17,17 @@ def get_standard_values(value:str=None) -> object:
     else:
         return werte 
 
-def dateien_laden(directory:str) -> object:
+def lade_csv(pfade:list) -> pd.DataFrame:
+    df_csv = pd.DataFrame({ "zeit": [], "dateiname": [], "dateipfad": []})
+    for pfad in pfade:
+        dateiname = os.path.basename(pfad)
+        _, ext = os.path.splitext(dateiname)
+        if ext.lower() == ".csv": # Prüfe auf Video Datei -> True
+            date = str(extrahiere_datum(dateiname)).strip(" HH-MM-SS")
+            df_csv.loc[len(df_csv)] = [date, dateiname, pfad]
+    return False, df_csv, None
+
+def dateien_laden(directory:str) -> pd.DataFrame:
     """
     """
     extensions = get_standard_values("video_extensions")
@@ -49,7 +59,7 @@ def convert_to_pandas(daten:list, names:list) -> object:
     df.columns = names # Hängt die Überschriften an
     
     for idx, row in df.iterrows(): # Fügt alles in ein Zeitformat
-        error, datum_uhrzeit = timeparser(row["zeit"],"str")
+        error, datum_uhrzeit = timeparser(row[0],"str")
         if error:
             df.loc[idx, "zeit"] = None
         else:
@@ -69,6 +79,12 @@ def test_zeiteingabe(df_video:dict, mainpfad:dict) -> bool:
         if error:
             return error, idx, datum_uhrzeit
     return False, None, None
+
+def datum_einfangen(df_csv:pd.DataFrame):
+    df_csv["zeit"] = df_csv["zeit"].apply(
+        lambda x: dateparser(x)[1]
+    )
+
 
 def zeiten_anpassen(df_video: pd.DataFrame, mainpfad: list[dict]) -> pd.DataFrame:
     """

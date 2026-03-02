@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*- 
 import sys
+from verarbeitung import rskripting as rs
 from verarbeitung import excel_ausgabe as ex
 from verarbeitung import opentracffic as ot
 from verarbeitung import analyse_erfassung as ae
@@ -64,7 +65,7 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
             for datei in dateien:
                 self.mainpfad.append({"pfad":datei})
             self.aktivCSV()
-            self.cvsTabelle()
+            self.cvsTabelle(dateien)
 
 
     def bestaetigen(self) -> None:
@@ -127,12 +128,16 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
                 ot.start_otvision(detect, directory, durination, modell, conf_value, iou_value, track)
             QMessageBox.information(self, "Hinweis", f"Die Analyse der Videos ist abgeschlossen.", QMessageBox.Ok, QMessageBox.Ok)
 
-        # if self.rErgBox.isChecked():
-        #     pass
+        if self.rErgBox.isChecked():
+            df_csv = self.get_table_data()
+            for _, row in df_csv.iterrows():
+                rs.ergebnisdarstellung(row[0], row[2])
 
         if self.excelBox.isChecked():
-            fs = [r".\2026-02-01_13-17-45.counts_15min.csv",
-                ]
+            fs = []
+            for mpfad in self.mainpfad():
+                fs.append(mpfad["pfad"])
+
             d = ex.connect(fs)
             f = ex.convert(d, fs[0])
             ex.firstpage(f)
@@ -162,8 +167,11 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
             self.tabelle_fuellen(df_videos)
         self.bereit()
 
-    def cvsTabelle(self) -> None:
-        pass
+    def cvsTabelle(self, pfade) -> None:
+        error, df_csv, errortyp = ae.lade_csv(pfade)
+        self.tabelle_fuellen(df_csv)
+        QMessageBox.warning(self, "Warnung", f"Bitte trage ein Datum der Ererhebung ein.", QMessageBox.Ok, QMessageBox.Ok)
+        self.bereit()
 
     def tabelle_fuellen(self, df:dict) -> None:
         """
@@ -398,7 +406,7 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
 
         if video:
             return ae.zeiten_anpassen(df, self.mainpfad)
-        return df
+        return ae.datum_einfangen(df)
 
     def keyPressEvent(self, event: QKeyEvent):
         if event.key() == Qt.Key.Key_Delete:

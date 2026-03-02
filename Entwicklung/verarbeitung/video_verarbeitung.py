@@ -24,7 +24,7 @@ def extrahiere_datum(dateiname):
 
 def timeparser(date_string: str, returns="timestamp") -> datetime:
     """
-    Versucht, das Datum mit jedem Format aus der Liste zu parsen.
+    Versucht, das Datum & Uhrzeit mit jedem Format aus der Liste zu parsen.
     Gibt das erste erfolgreiche datetime‑Objekt zurück.
     Falls kein Format passt, wird ein ValueError ausgelöst.
     """
@@ -70,6 +70,33 @@ def timeparser(date_string: str, returns="timestamp") -> datetime:
                 return False, datum_uhrzeit
             elif returns == "str":
                 return False, datum_uhrzeit.strftime('%Y-%m-%d %H-%M-%S')
+        
+    # Kein Format hat funktioniert
+    return True, date_string
+
+def dateparser(date_string: str, returns:str=None) -> datetime:
+    """
+    Versucht, das Datum mit jedem Format aus der Liste zu parsen.
+    Gibt das erste erfolgreiche datetime‑Objekt zurück.
+    Falls kein Format passt, wird ein ValueError ausgelöst.
+    """
+    formats = [
+        "%Y-%m-%d",
+        "%Y.%m.%d",
+    ]
+
+    for fmt in formats:
+        try:
+            if date_string is None:
+                break
+            datum_uhrzeit = datetime.strptime(date_string, fmt).date()
+        except ValueError:
+            continue
+        else:
+            if returns == "timestamp":
+                return False, datum_uhrzeit
+            else:
+                return False, datum_uhrzeit.strftime('%Y-%m-%d')
         
     # Kein Format hat funktioniert
     return True, date_string
