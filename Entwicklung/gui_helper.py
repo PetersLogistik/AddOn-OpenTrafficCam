@@ -135,8 +135,9 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
 
         if self.excelBox.isChecked():
             fs = []
-            for mpfad in self.mainpfad():
-                fs.append(mpfad["pfad"])
+            df_csv = self.get_table_data()
+            for _, row in df_csv.iterrows():
+                fs.append(row[2])
 
             d = ex.connect(fs)
             f = ex.convert(d, fs[0])

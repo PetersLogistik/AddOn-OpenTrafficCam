@@ -50,7 +50,7 @@ def dateien_laden(directory:str) -> pd.DataFrame:
     else: # Kein Pfad
         return True, df_videos, f"Pfad"
 
-def convert_to_pandas(daten:list, names:list) -> object:
+def convert_to_pandas(daten:list, names:list) -> pd.DataFrame:
     """
         convertiert eine Liste in ein Dateframe
     """
@@ -84,6 +84,7 @@ def datum_einfangen(df_csv:pd.DataFrame):
     df_csv["zeit"] = df_csv["zeit"].apply(
         lambda x: dateparser(x)[1]
     )
+    return df_csv
 
 
 def zeiten_anpassen(df_video: pd.DataFrame, mainpfad: list[dict]) -> pd.DataFrame:
