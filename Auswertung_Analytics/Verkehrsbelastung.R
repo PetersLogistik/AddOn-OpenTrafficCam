@@ -12,17 +12,19 @@ library(scales)
 library(lubridate)
 
 date = "14.10.2025"
-out <- "D:/Erhebungen/2025-10 Kiel/Knoten 1/Digitale_Verkehrsauswertung_14_10_2025_nachmittag_knoten1.png"
-pfad = "D:/Erhebungen/2025-10 Kiel/Knoten 1/14 Uhr/2025-10-21_15-12-13.counts_15min_reduziert.csv"
+out <- "D:/Erhebungen/2025-10 Om Berg/Digitale_Verkehrsauswertung_14_10_2025_nachmittag_knoten1.png"
+pfad = "D:/Erhebungen/2025-10 Om Berg/cam1/2025-12-01_13-31-56.counts_15min.csv"
 file <- paste0(pfad)
 # Read the CSV file into R
 events <- read.csv(file, header = TRUE)
+
+typ = c('bicycle', 'bus', 'car', 'motorcycle', 'person', 'train', 'truck')
 
 # Daten vorbereiten: Summen je Kategorie berechnen
 df <- events %>%
   group_by(classification) %>%
   summarise(summe = sum(count, na.rm = TRUE), .groups = "drop") %>%
-  filter(summe > 10) %>%
+  filter(summe > 10 & classification %in% typ) %>%
   pull(classification)
 
 #events <- events %>%
@@ -43,6 +45,7 @@ event = events %>%
     anz = sum(count, na.rm = TRUE),
     .groups = "drop"
   ) 
+gesammteFz <- sum(event$anz, na.rm = TRUE)
 
 d1 <- event %>%
   ggplot(aes(x=time, y=anz, color=classification))+
@@ -55,7 +58,7 @@ d1 <- event %>%
   #scale_x_continuous(labels = format_hhmm,)+
   labs(title = "Digitale Verkehrsauswertung - Kiel", 
        subtitle = date,
-       caption = paste("n = ","None"),#,format( nrow(event), big.mark = ".", decimal.mark = ",", scientific = FALSE)),
+       caption = paste("n = ",format( gesammteFz, big.mark = ".", decimal.mark = ",", scientific = FALSE)),
        x = "Uhrzeit",
        y = "Anzahl",
        color = "Farzeugart") +

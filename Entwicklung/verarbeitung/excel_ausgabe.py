@@ -1,4 +1,5 @@
 # UTF-8
+import os
 import pandas as pd
 from tqdm import tqdm
 import numpy as np
@@ -472,6 +473,10 @@ def firstpage(file, minutes=15):
     # file = file.replace('.xlsx','_final.xlsx', 1)
     workbook.save(file)
     workbook.close()
+
+    # Datei öffnen
+    if os.path.exists(file):
+        os.startfile(file)
 
 if __name__ == "__main__":
     pass
