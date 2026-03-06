@@ -61,7 +61,6 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
         """
         dateien, _ = QFileDialog.getOpenFileNames(self, "Dateien öffnen", "", "CSV-Datei (*.csv);;Alle Dateien (*);")
         if dateien:
-            print(dateien)
             for datei in dateien:
                 self.mainpfad.append({"pfad":datei})
             self.aktivCSV()
@@ -128,22 +127,23 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
                 ot.start_otvision(detect, directory, durination, modell, conf_value, iou_value, track)
             QMessageBox.information(self, "Hinweis", f"Die Analyse der Videos ist abgeschlossen.", QMessageBox.Ok, QMessageBox.Ok)
 
+
         if self.rErgBox.isChecked():
             df_csv = self.get_table_data()
             for _, row in df_csv.iterrows():
-                rs.ergebnisdarstellung(row[0], row[2])
+                rs.ergebnisdarstellung(row.iloc[0], row.iloc[2])
 
         if self.excelBox.isChecked():
             fs = []
             df_csv = self.get_table_data()
             for _, row in df_csv.iterrows():
-                fs.append(row[2])
+                fs.append(row.iloc[2])
 
             d = ex.connect(fs)
             f = ex.convert(d, fs[0])
             ex.firstpage(f)
 
-        self.aktivVideo()
+        # self.aktivVideo()
         self.bereit()
 
     def start_ota(self):

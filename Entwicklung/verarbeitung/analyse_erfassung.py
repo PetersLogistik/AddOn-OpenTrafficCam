@@ -59,7 +59,7 @@ def convert_to_pandas(daten:list, names:list) -> pd.DataFrame:
     df.columns = names # Hängt die Überschriften an
     
     for idx, row in df.iterrows(): # Fügt alles in ein Zeitformat
-        error, datum_uhrzeit = timeparser(row[0],"str")
+        error, datum_uhrzeit = timeparser(row.iloc[0],"str")
         if error:
             df.loc[idx, "zeit"] = None
         else:
