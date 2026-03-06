@@ -2,7 +2,6 @@ modells:
 - yolo11m
 - yolov8m
 - yolov8s
-- yolov8n
 - yolo26m
 modell_standard: 0
 conf_value: 0.25
