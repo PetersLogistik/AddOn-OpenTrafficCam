@@ -5,8 +5,8 @@ from verarbeitung import excel_ausgabe as ex
 from verarbeitung import opentracffic as ot
 from verarbeitung import analyse_erfassung as ae
 from mainUi_ui import Ui_MainWindow
-from PyQt6.QtGui import QAction, QKeyEvent
-from PySide6.QtCore import QTimer, Qt
+from PyQt6.QtGui import QMouseEvent, QKeyEvent
+from PySide6.QtCore import QTimer, Qt, QPointF, QPoint
 from PySide6.QtWidgets import QApplication, QFileDialog, QTableWidgetItem, QMainWindow, QMessageBox, QPushButton, QMenu
 
 class Ui_Erfassung(QMainWindow, Ui_MainWindow):
@@ -20,6 +20,10 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
         self.otanalyticsButton.clicked.connect(self.start_ota)
         self.resetButton.clicked.connect(self.resetGui)
         self.startButton.clicked.connect(self.get_input)
+
+        # Besondere aktion beim Label Modell
+        self.setMouseTracking(True)
+        self.label.mouseDoubleClickEvent = self.on_label_double_click
 
         self.reset_aktiv = False
         self.timer = QTimer()
@@ -41,15 +45,45 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
         
         # Alle Pfade sichern 
         self.mainpfad = []
+        self.edit = False
     
     """
         Button - Definiton
     """
+    def on_label_double_click(self, event):
+        """Label Doppelklick Event"""
+        if event.button() == Qt.MouseButton.LeftButton:
+            if self.label.geometry().contains(event.position().toPoint()):
+                
+                if self.edit:
+                    self.edit = False
+                    self.statusBar().showMessage("Eingabe gesichert.")
+                    eingabe = self.modellBox.currentText()
+                    ae.add_modell_wert(eingabe)
+                    self.modellBox.setEditable(False)
+                    self.modellBox.clear()
+                    value = ae.load_basiswerte()
+                    self.modellBox.addItems(value["modells"])
+                else:
+                    self.edit = True
+                    self.statusBar().showMessage("Editmodus aktiv.")
+                    self.modellBox.setEditable(True)
+
+    def get_oderner(self) -> str:
+        dialog = QFileDialog(self)
+        dialog.setFileMode(QFileDialog.Directory)  # Zeigt Verzeichnisse und Dateien an
+        dialog.setOption(QFileDialog.DontUseNativeDialog, True)  # Verhindert Probleme mit nativen Dialogen
+        dialog.setWindowTitle("Ordner wählen")
+
+        if dialog.exec() == QFileDialog.Accepted:
+            directory = dialog.directory().path()
+            return directory
+        
     def ordnerEingabe(self) -> None:
         """
             Durch den Nutzer gestartet und läd einen ordner, anschließend wird der Pfad an ordnerAuswahl übergeben.
         """
-        directory = QFileDialog.getExistingDirectory(self, "Ordner wählen", "")
+        directory = QFileDialog.getExistingDirectory(self, "Ordner wählen", r"D:\Erhebungen\2026-02 Düsseldorf Rheinbahn\2026-03-05\cam3")
         if directory:
             self.mainpfad.append({"pfad":directory})
             self.aktivVideo()
@@ -104,14 +138,13 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
         self.statusBar().showMessage("Bitte Beachte die neu geöffneten Fenster.")
         # self.disableAll()
         
-        if self.tableStatus == "Video":
-            df_video = self.get_table_data(True)
-        
         if self.oneVideoBox.isChecked():
+            df_video = self.get_table_data(True)
             ae.make_onevideo(df_video)
             self.infobox("Es wurde ein durchgehendes Video mit Zeitstempel erstellt.")
         
         if self.vidoezeitBox.isChecked():
+            df_video = self.get_table_data(True)
             ae.videozeit_in_video(df_video)
             self.infobox("Alle Viedeos wurden mit einem Zeitstempel versehen.")
         
@@ -134,14 +167,8 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
                 rs.ergebnisdarstellung(row.iloc[0], row.iloc[2])
 
         if self.excelBox.isChecked():
-            fs = []
             df_csv = self.get_table_data()
-            for _, row in df_csv.iterrows():
-                fs.append(row.iloc[2])
-
-            d = ex.connect(fs)
-            f = ex.convert(d, fs[0])
-            ex.firstpage(f)
+            ex.main(df_csv)
 
         # self.aktivVideo()
         self.bereit()
@@ -230,7 +257,7 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
             # Setzt alle Elemente auf die Ausgangslage
         """
         # Werte laden
-        value = ae.get_standard_values()
+        value = ae.load_basiswerte()
         # Standartwerte
         self.tableStatus = None
         self.mainpfad = [] 
@@ -362,7 +389,8 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
             self.tableStatus = "CSV"
     
     def prepareTable(self, typ:str) -> None:
-        werte = ae.get_standard_values(f"{typ}")
+        value = ae.load_basiswerte()
+        werte = value[typ]
         self.tableWidget.setColumnCount(len(werte))
         self.tableWidget.setHorizontalHeaderLabels(werte)
 

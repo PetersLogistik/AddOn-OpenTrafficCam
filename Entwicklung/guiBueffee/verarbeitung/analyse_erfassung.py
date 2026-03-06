@@ -4,18 +4,31 @@ import yaml
 import pandas as pd
 from .video_verarbeitung import extrahiere_datum, timeparser, get_next_starttime, dateipfad_anpassen, one_video, make_video_overlay, get_video_len_ffprobe, dateparser
 
-def get_standard_values(value:str=None) -> object:
-    """
-        Reading a config file
-    """
+def load_basiswerte():
+    """Basiswerte aus YAML-Datei laden"""
     file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "basiswerte.yaml")
-    with open(file, "r") as file:
-        werte = yaml.safe_load(file)
-    
-    if value != None:
-        return werte[f"{value}"]
-    else:
-        return werte 
+    with open(file, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+def save_basiswerte(werte):
+    """Basiswerte in YAML-Datei speichern"""
+    file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "basiswerte.yaml")
+
+    try:
+        with open(file, "w", encoding="utf-8") as f:
+            yaml.dump(werte, f, allow_unicode=True, sort_keys=False)
+        return True
+    except Exception as e:
+        return False
+
+def add_modell_wert(neues_modell):
+    """Neuen Modell-Wert hinzufügen"""
+    basis = load_basiswerte()
+    wert = basis["modells"]
+    if neues_modell not in wert:
+        wert.append(neues_modell)
+    basis["modells"] = wert
+    save_basiswerte(basis)
 
 def lade_csv(pfade:list) -> pd.DataFrame:
     df_csv = pd.DataFrame({ "zeit": [], "dateiname": [], "dateipfad": []})
@@ -30,7 +43,8 @@ def lade_csv(pfade:list) -> pd.DataFrame:
 def dateien_laden(directory:str) -> pd.DataFrame:
     """
     """
-    extensions = get_standard_values("video_extensions")
+    value = load_basiswerte()
+    extensions = value["video_extensions"]
     df_videos = pd.DataFrame({ "zeit": [], "dateiname": [], "dateipfad": [] , "basispfad": []})
     
     if directory:
@@ -126,7 +140,8 @@ def get_durination(directory):
     """
         Misst die durchschnittliche Zeit der Videos
     """
-    extensions = get_standard_values("video_extensions")
+    value = load_basiswerte()
+    extensions = value["video_extensions"]
     anz = v_len = 0
     files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
     files.sort()
@@ -142,9 +157,8 @@ def get_durination(directory):
         duration = round(v_len / anz, 0).as_integer_ratio()[0]
     except:
         duration = -1
-    print(f"Durchschnittlich ist ein Video {duration} lang.")
+    # print(f"Durchschnittlich ist ein Video {duration} lang.")
     return duration
 
 if __name__ == "__main__":
-    # print(dateien_laden(r"J:\Düsseldorf 01.07.2025 und 03.07.2025\03.07.2025\cam3\7-10.15uhr\354GOPRO"))
     pass

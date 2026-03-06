@@ -188,7 +188,7 @@ def one_video(directory:str, time:str) -> object:
     """
     extensions = [".mp4", ".MP4", ".avi",".mkv",".mov"]
     _, datum_uhrzeit = timeparser(time)
-    file_output = os.path.abspath(os.path.join(directory, f"fullvideo_{datum_uhrzeit.strftime('%Y-%m-%d_%H-%M-%S')}.mp4"))
+    file_output = os.path.abspath(os.path.join(os.path.dirname(directory), f"fullvideo_{datum_uhrzeit.strftime('%Y-%m-%d_%H-%M-%S')}.mp4"))
 
     files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
 

@@ -8,6 +8,14 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import PatternFill, Border, Side, Font, Alignment, NamedStyle
 
+def main(df_csv):
+    groups = df_csv.groupby("dateipfad")
+    dateipfade = list(groups.groups.keys())
+    d = connect(dateipfade)
+    ziel_pfad = os.path.dirname(os.path.dirname(dateipfade[0]))
+    f = convert(d, ziel_pfad)
+    firstpage(f)
+    
 def connect(file_list) -> object:
     for i in range(len(file_list)):
         if i == 0:
@@ -69,7 +77,7 @@ def convert(df, file) -> str:
             elif typ == 'truck':
                 kn.loc[idx, 'Lkw'] = count
     # save als Excel
-    file = file.replace('.csv','_bueffeeTable.xlsx', 1)
+    file = file + '_bueffeeTable.xlsx'
     with pd.ExcelWriter(file, mode='w', engine='openpyxl') as writer:
         kn.to_excel(writer, sheet_name='DB-01', index=False)
     # fiziere erste Zeile

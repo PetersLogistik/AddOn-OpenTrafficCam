@@ -21,7 +21,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>bueffee_steben.png</normaloff>bueffee_steben.png</iconset>
+    <normaloff>img/bueffee_steben.png</normaloff>img/bueffee_steben.png</iconset>
   </property>
   <property name="windowFilePath">
    <string notr="true"/>

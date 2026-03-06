@@ -1,5 +1,5 @@
 ## Import functions from modules
-from .analyse_erfassung import (get_standard_values, dateien_laden, convert_to_pandas, 
+from .analyse_erfassung import (load_basiswerte, save_basiswerte, add_modell_wert, dateien_laden, convert_to_pandas, 
                                 test_zeiteingabe, zeiten_anpassen, dateiname_anpassen, make_onevideo,
                                 videozeit_in_video)
 from .opentracffic import start_otvision, start_otanalytics
