@@ -12,11 +12,14 @@ def check_otc_installed():
             return False, "otc nicht im PATH gefunden"
         
         # Version abrufen (angepasst an otc)
-        result = subprocess.run(
+        result = subprocess.Popen(
             [otc_path, "--version"],
             capture_output=True,
             text=True,
-            timeout=10
+            timeout=10,
+            creationflags=subprocess.CREATE_NEW_CONSOLE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
         )
         
         if result.returncode == 0:

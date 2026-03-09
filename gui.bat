@@ -1,21 +1,34 @@
 @echo off
+setlocal
 
 :: Aktiviere virtuelles Py-Umfeld
 if not exist ".env\Scripts\activate.bat" (
-    echo Virtuelles Python-Umfeld nicht gefunden.
+    echo Virtuelles Python-Umfeld nicht gefunden. Installation wird gestartet...
     python -m venv .env
-    call .env\Scripts\activate
-    python.exe -m pip install --upgrade pip
-    pip install -r guiBueffee/requirements.txt --no-cache-dir
-    echo "Installation abgeschlossen"
+    
+    :: Aktiviere das neue Umfeld
+    call .env\Scripts\activate.bat
+    
+    :: Pip upgraden und Abhängigkeiten installieren
+    python -m pip install --upgrade pip
+    python -m pip install -r guiBueffee/requirements.txt --no-cache-dir
+    
+    echo Installation abgeschlossen.
+) else (
+    echo Virtuelles Python-Umfeld bereits vorhanden.
 )
 
+:: Aktiviere das Umfeld (falls es schon existierte oder um sicherzugehen)
 call .env\Scripts\activate
-:: führe Skript aus
-call python "%~dp0guiBueffee/gui_helper.py"
-:: Beende alles
+
+:: Führe Skript aus (mit absolutem Pfad zum Skript-Ordner)
+call python "%~dp0guiBueffee\gui_helper.py" > error.log 2>&1
+
+:: Beende virtuelles Umfeld
 deactivate
-::wenn deactivate nicht funktioniert
-endlocal
-:: Console schließen
+
+:: Warte kurz, damit man Fehler sehen kann (optional)
+pause
+
+::endlocal
 exit

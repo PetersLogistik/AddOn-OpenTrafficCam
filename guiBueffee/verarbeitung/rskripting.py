@@ -2,12 +2,6 @@
 import os
 import shutil
 import subprocess
-try:
-    os.environ['RPY2_CFFI_MODE'] = 'ABI'
-    os.environ['R_HOME'] = os.path.dirname(os.path.dirname(os.environ.get('R_HOME', '')))
-    import rpy2.robjects as robjects #pip install rpy2==3.5.12
-except:
-    pass
 
 def check_r_installed() -> bool:
     """Prüft, ob R installiert ist und gibt die Version zurück."""
@@ -26,6 +20,7 @@ def check_r_installed() -> bool:
         )
         
         if result.returncode == 0:
+            os.environ['R_HOME'] = r_path
             version_line = result.stderr.split('--')[0]
             return True, version_line
         else:
@@ -37,6 +32,14 @@ def check_r_installed() -> bool:
         return False, "R-Aufruf hat zu lange gedauert"
     except Exception as e:
         return False, f"Unerwarteter Fehler: {str(e)}"    
+
+r_home, _ = check_r_installed()
+if r_home:
+    os.environ['RPY2_CFFI_MODE'] = 'ABI'
+    try:
+        import rpy2.robjects as robjects #pip install rpy2==3.5.12
+    except:
+        pass
 
 def ergebnisdarstellung(date:str, pfad_input:str, pfad_output:str=None) -> None:
     # pfad_output = r"D:/Erhebungen/2025-10 Kiel/Knoten 1/Digitale_Verkehrsauswertung_14_10_2025_nachmittag_knoten1.png"
