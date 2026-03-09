@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*- 
 import os
-import rpy2.robjects as robjects #pip install rpy2==3.5.12
+
+def rhome_in() -> bool:
+    if "R_HOME" in os.environ:
+        return True
+    print("R wurde im System nicht gefunden. Bitte Installieren Sie R bzw. fügen Sie den Ordnerpfad den Systsemvariablen hinzu.")
+    return False
+    
+if rhome_in():
+    import rpy2.robjects as robjects #pip install rpy2==3.5.12
 
 def ergebnisdarstellung(date:str, pfad_input:str, pfad_output:str=None) -> None:
     # pfad_output = r"D:/Erhebungen/2025-10 Kiel/Knoten 1/Digitale_Verkehrsauswertung_14_10_2025_nachmittag_knoten1.png"

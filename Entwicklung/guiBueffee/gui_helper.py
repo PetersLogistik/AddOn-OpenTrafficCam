@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*- 
-import sys
+import sys, os
 from verarbeitung import rskripting as rs
 from verarbeitung import excel_ausgabe as ex
 from verarbeitung import opentracffic as ot
 from verarbeitung import analyse_erfassung as ae
 from mainUi_ui import Ui_MainWindow
-from PyQt6.QtGui import QMouseEvent, QKeyEvent
-from PySide6.QtCore import QTimer, Qt, QPointF, QPoint
-from PySide6.QtWidgets import QApplication, QFileDialog, QTableWidgetItem, QMainWindow, QMessageBox, QPushButton, QMenu
+from PySide6.QtGui import QKeyEvent, QPixmap
+from PySide6.QtCore import QTimer, Qt
+from PySide6.QtWidgets import QApplication, QFileDialog, QTableWidgetItem, QMainWindow, QMessageBox, QPushButton, QMenu, QLabel, QVBoxLayout, QDialog
 
 class Ui_Erfassung(QMainWindow, Ui_MainWindow):
     # https://doc.qt.io/
@@ -83,7 +83,7 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
         """
             Durch den Nutzer gestartet und läd einen ordner, anschließend wird der Pfad an ordnerAuswahl übergeben.
         """
-        directory = QFileDialog.getExistingDirectory(self, "Ordner wählen", r"D:\Erhebungen\2026-02 Düsseldorf Rheinbahn\2026-03-05\cam3")
+        directory = QFileDialog.getExistingDirectory(self, "Ordner wählen",)
         if directory:
             self.mainpfad.append({"pfad":directory})
             self.aktivVideo()
@@ -99,7 +99,6 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
                 self.mainpfad.append({"pfad":datei})
             self.aktivCSV()
             self.cvsTabelle(dateien)
-
 
     def bestaetigen(self) -> None:
         """
@@ -370,7 +369,10 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
             Reduziet die Auswahl, wenn CSV bearbeitet werden.
         """
         # Enable
-        self.rErgBox.setCheckable(True)
+        if rs.rhome_in:
+            self.rErgBox.setCheckable(True)
+        else:
+            self.rErgBox.setDisabled(True)
         self.excelBox.setCheckable(True)
         # Disable
         self.addButton.setDisabled(True)
@@ -464,9 +466,46 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
         QTimer.singleShot(10000, lambda: msg.done(0))
         msg.exec()
 
+class InfoDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Willkommen")
+        self.setFixedSize(400, 300)
+
+        # Pfad zum Bild
+        script_path = os.path.dirname(os.path.abspath(__file__))
+        img_path = os.path.join(script_path, "img", "bueffee_mailfuss.png")
+
+        # QApplication muss existieren!
+        pixmap = QPixmap(img_path)
+        if pixmap.isNull():
+            raise FileNotFoundError(f"Bild konnte nicht geladen werden! \n{img_path}")
+
+        # QLabel mit Parent self
+        image_label = QLabel(self)
+        image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        image_label.setPixmap(pixmap)
+
+        # Text
+        text_label = QLabel("Version 1.0.0")
+        text_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # OK-Button
+        ok_button = QPushButton("OK")
+        ok_button.clicked.connect(self.accept)
+
+        # Layout
+        layout = QVBoxLayout(self)
+        layout.addWidget(image_label)
+        layout.addWidget(text_label)
+        layout.addWidget(ok_button)
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
+    dialog = InfoDialog()
+    dialog.exec()  
+    
     window = Ui_Erfassung()
     window.show()
 
