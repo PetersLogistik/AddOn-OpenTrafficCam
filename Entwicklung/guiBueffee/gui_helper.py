@@ -5,7 +5,7 @@ from verarbeitung import excel_ausgabe as ex
 from verarbeitung import opentracffic as ot
 from verarbeitung import analyse_erfassung as ae
 from mainUi_ui import Ui_MainWindow
-from PySide6.QtGui import QKeyEvent, QPixmap
+from PySide6.QtGui import QKeyEvent, QPixmap, QIcon
 from PySide6.QtCore import QTimer, Qt
 from PySide6.QtWidgets import QApplication, QFileDialog, QTableWidgetItem, QMainWindow, QMessageBox, QPushButton, QMenu, QLabel, QVBoxLayout, QDialog
 
@@ -14,6 +14,9 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
+        script_path = os.path.dirname(os.path.abspath(__file__))
+        img_path = os.path.join(script_path, "img", "bueffee_streben.png")
+        self.setWindowIcon(QIcon(img_path))
         self.addButton.clicked.connect(self.ordnerEingabe)
         self.addCSVButton.clicked.connect(self.csvEingabe)
         self.reloadButton.clicked.connect(self.bestaetigen)
@@ -369,7 +372,8 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
             Reduziet die Auswahl, wenn CSV bearbeitet werden.
         """
         # Enable
-        if rs.rhome_in:
+        r_home, _ = rs.check_r_installed()
+        if r_home:
             self.rErgBox.setCheckable(True)
         else:
             self.rErgBox.setDisabled(True)
@@ -470,10 +474,13 @@ class InfoDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Willkommen")
-        self.setFixedSize(400, 300)
+        self.setFixedSize(300, 300)
+
+        script_path = os.path.dirname(os.path.abspath(__file__))
+        img_path = os.path.join(script_path, "img", "bueffee_streben.png")
+        self.setWindowIcon(QIcon(img_path))
 
         # Pfad zum Bild
-        script_path = os.path.dirname(os.path.abspath(__file__))
         img_path = os.path.join(script_path, "img", "bueffee_mailfuss.png")
 
         # QApplication muss existieren!
@@ -486,8 +493,10 @@ class InfoDialog(QDialog):
         image_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         image_label.setPixmap(pixmap)
 
+        _, rmeldung = rs.check_r_installed()
+        _, otcmeldung = ot.check_otc_installed()
         # Text
-        text_label = QLabel("Version 1.0.0")
+        text_label = QLabel(f"Bueffee GuI für Open Traffic \nVersion 1.0.0\n\nR:\n{rmeldung}\n\nOpen Traffic Cam:\n{otcmeldung}")
         text_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # OK-Button

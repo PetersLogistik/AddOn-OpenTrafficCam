@@ -86,7 +86,7 @@
           <item>
            <widget class="QPushButton" name="addCSVButton">
             <property name="text">
-             <string notr="true">CSV hinzufügen</string>
+             <string notr="true">CSV2 hinzufügen</string>
             </property>
            </widget>
           </item>

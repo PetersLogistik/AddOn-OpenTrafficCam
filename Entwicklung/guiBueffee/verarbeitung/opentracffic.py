@@ -1,8 +1,37 @@
 # -*- coding: utf-8 -*-
-import os, sys
+import os, sys, shutil
 import subprocess
 from pathlib import Path
 
+def check_otc_installed():
+    """Prüft, ob otc installiert ist und gibt die Version zurück."""
+    try:
+        # Prüfen ob otc im PATH ist
+        otc_path = shutil.which("OT_PATH")
+        if not otc_path:
+            return False, "otc nicht im PATH gefunden"
+        
+        # Version abrufen (angepasst an otc)
+        result = subprocess.run(
+            [otc_path, "--version"],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        
+        if result.returncode == 0:
+            version_line = result.stderr.split('\n')[0]
+            return True, version_line
+        else:
+            return False, f"Fehler beim Ausführen: {result.stderr}"
+            
+    except FileNotFoundError:
+        return False, "otc-Executable nicht gefunden"
+    except subprocess.TimeoutExpired:
+        return False, "otc-Aufruf hat zu lange gedauert"
+    except Exception as e:
+        return False, f"Unerwarteter Fehler: {str(e)}"
+    
 def start_otvision(detect:bool, directory:str, durination:int, modell:str, conf_value:float, iou_value:float, track:bool):
     # OT_PATH aus Umgebungsvariable holen
     ot_path = os.getenv("OT_PATH")

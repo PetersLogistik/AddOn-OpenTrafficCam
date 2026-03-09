@@ -1,14 +1,42 @@
 # -*- coding: utf-8 -*- 
 import os
-
-def rhome_in() -> bool:
-    if "R_HOME" in os.environ:
-        return True
-    print("R wurde im System nicht gefunden. Bitte Installieren Sie R bzw. fügen Sie den Ordnerpfad den Systsemvariablen hinzu.")
-    return False
-    
-if rhome_in():
+import shutil
+import subprocess
+try:
+    os.environ['RPY2_CFFI_MODE'] = 'ABI'
+    os.environ['R_HOME'] = os.path.dirname(os.path.dirname(os.environ.get('R_HOME', '')))
     import rpy2.robjects as robjects #pip install rpy2==3.5.12
+except:
+    pass
+
+def check_r_installed() -> bool:
+    """Prüft, ob R installiert ist und gibt die Version zurück."""
+    try:
+        # Prüfen ob R im PATH ist
+        r_path = shutil.which("R")
+        if not r_path:
+            return False, "R nicht im PATH gefunden"
+        
+        # Version abrufen
+        result = subprocess.run(
+            [r_path, "--version"],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        
+        if result.returncode == 0:
+            version_line = result.stderr.split('--')[0]
+            return True, version_line
+        else:
+            return False, f"Fehler beim Ausführen: {result.stderr}"
+            
+    except FileNotFoundError:
+        return False, "R-Executable nicht gefunden"
+    except subprocess.TimeoutExpired:
+        return False, "R-Aufruf hat zu lange gedauert"
+    except Exception as e:
+        return False, f"Unerwarteter Fehler: {str(e)}"    
 
 def ergebnisdarstellung(date:str, pfad_input:str, pfad_output:str=None) -> None:
     # pfad_output = r"D:/Erhebungen/2025-10 Kiel/Knoten 1/Digitale_Verkehrsauswertung_14_10_2025_nachmittag_knoten1.png"
@@ -99,3 +127,6 @@ def ergebnisdarstellung(date:str, pfad_input:str, pfad_output:str=None) -> None:
     # Datei öffnen
     if os.path.exists(pfad_output):
         os.startfile(pfad_output)
+
+if __name__ == '__main__':
+    pass

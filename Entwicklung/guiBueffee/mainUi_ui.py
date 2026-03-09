@@ -29,7 +29,7 @@ class Ui_MainWindow(object):
         MainWindow.setMinimumSize(QSize(420, 620))
         MainWindow.setWindowTitle(u"Videoerfassung f\u00fcr OTC")
         icon = QIcon()
-        icon.addFile(u"bueffee_steben.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
+        icon.addFile(u"img\\bueffee_steben.png", QSize(), QIcon.Mode.Normal, QIcon.State.Off)
         MainWindow.setWindowIcon(icon)
         MainWindow.setWindowFilePath(u"")
         MainWindow.setTabShape(QTabWidget.TabShape.Rounded)
