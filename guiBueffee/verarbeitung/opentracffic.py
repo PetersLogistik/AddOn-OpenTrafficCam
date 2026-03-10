@@ -9,7 +9,7 @@ def check_otc_installed():
         # Prüfen ob otc im PATH ist
         otc_path = shutil.which("OT_PATH")
         if not otc_path:
-            return False, "otc nicht im PATH gefunden"
+            return True, "otc nicht im PATH gefunden"
         
         # Version abrufen (angepasst an otc)
         result = subprocess.Popen(

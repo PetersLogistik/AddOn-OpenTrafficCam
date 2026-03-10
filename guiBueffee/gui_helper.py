@@ -220,7 +220,7 @@ class Ui_Erfassung(QMainWindow, Ui_MainWindow):
             Wenn keine Uhrzeit angegeben ist, dann soll eine Zeit eingegeben werden. Diese Funktion führt errechnet die folgezeiten für alle leeren Zeitkästen & bennet die Dateien um.
         """
         # Typ = True: mit Umbennung; Typ = False: ohne Umbennenung
-        self.disableAll()
+        # self.disableAll()
         df_video = self.get_table_data(True)
 
         error, idx, datum_uhrzeit = ae.test_zeiteingabe(df_video, self.mainpfad)

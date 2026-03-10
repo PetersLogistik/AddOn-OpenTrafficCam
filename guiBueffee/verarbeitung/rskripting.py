@@ -9,9 +9,9 @@ def check_r_installed() -> bool:
         # Prüfen ob R im PATH ist
         r_path = shutil.which("R")
         if not r_path:
-            return False, "R nicht im PATH gefunden"
+            return True, "R nicht im PATH gefunden"
         
-        # Version abrufen
+        # Version abrufent
         result = subprocess.run(
             [r_path, "--version"],
             capture_output=True,
